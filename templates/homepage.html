@@ -1,12 +1,13 @@
 {% extends "home_base.html" %}
-{% block title %}Pizza Planet | Home{% endblock %}
+
+{% block title %}Pizza Mamma Mia | Home{% endblock %}
 
 {% block hero %}
 <section class="hero">
     <div class="hero-text">
-        <h2>Welcome to Pizza Planet!</h2>
+        <h2>Welcome to Pizza Mamma Mia!</h2>
         <p>Hot, fresh, and made with love — every single slice 🍕</p>
-        <a href="{{ url_for('home') }}" class="btn">Start Your Order</a>
+        <a href="#" class="btn">Start Your Order</a>
     </div>
 </section>
 {% endblock %}
@@ -16,34 +17,33 @@
     <h2>Our Most Popular Pizzas</h2>
     <div class="pizza-grid">
         <div class="pizza-card">
-            <img src="{{ url_for('static', filename='images/margherita.jpg') }}" alt="Margherita Pizza">
+            <img src="{{ url_for('static', filename='images/margherita.jpg') }}" alt="Margherita">
             <h3>Margherita</h3>
             <p>Fresh mozzarella, tomato sauce, and basil.</p>
             <button class="btn">Order Now</button>
         </div>
 
         <div class="pizza-card">
-            <img src="{{ url_for('static', filename='images/pepperoni.jpg') }}" alt="Pepperoni Pizza">
+            <img src="{{ url_for('static', filename='images/pepperoni.jpg') }}" alt="Pepperoni">
             <h3>Pepperoni</h3>
-            <p>A timeless classic topped with spicy pepperoni.</p>
+            <p>A timeless favorite topped with spicy pepperoni.</p>
             <button class="btn">Order Now</button>
         </div>
 
         <div class="pizza-card">
             <img src="{{ url_for('static', filename='images/veggie.jpg') }}" alt="Veggie Supreme">
             <h3>Veggie Supreme</h3>
-            <p>Loaded with fresh veggies and a light tomato sauce.</p>
+            <p>Loaded with farm-fresh vegetables.</p>
             <button class="btn">Order Now</button>
         </div>
     </div>
 </section>
 
 <section class="about">
-    <h2>Why Choose Pizza Planet?</h2>
+    <h2>About Pizza Mamma Mia</h2>
     <p>
-        We’ve been serving hand-crafted pizzas since 1999.
-        Our dough is made fresh daily, our ingredients are locally sourced,
-        and every pizza is baked to perfection in our stone ovens.
+        Serving delicious pizzas since 1999! Every pizza is baked to perfection using
+        locally sourced ingredients and hand-stretched dough made fresh daily.
     </p>
 </section>
 {% endblock %}

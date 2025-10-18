@@ -1,10 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Pizza Planet{% endblock %}</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Google Fonts (optional) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-$END$
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container">
+            <h1 class="logo"><a href="{{ url_for('index') }}">🍕 Pizza Mamma Mia</a></h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="#">Menu</a></li>
+                    <li><a href="#">Cart</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    {% block hero %}
+    <section class="hero">
+        <div class="hero-text">
+            <h2>Hot, Fresh &amp; Delicious</h2>
+            <p>Order your favorite pizza in just a few clicks!</p>
+            <a href="{{ url_for('menu') }}" class="btn">Order Now</a>
+        </div>
+    </section>
+    {% endblock %}
+
+    <!-- Main Content -->
+    <main class="content">
+        {% block content %}
+        <!-- Page-specific content goes here -->
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; {{ current_year }} Pizza Mamma Mia — All Rights Reserved</p>
+    </footer>
 </body>
 </html>
