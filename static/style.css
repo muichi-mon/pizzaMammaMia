@@ -1,3 +1,7 @@
+/* ==============================
+   HOME PAGE STYLES
+   ============================== */
+
 body {
     font-family: 'Poppins', sans-serif;
     margin: 0;
@@ -36,7 +40,7 @@ body {
     background-image: url('{{ url_for("static", filename="images/pizza-bg.jpg") }}');
     background-size: cover;
     background-position: center;
-    color: white;
+    color: black;
     text-align: center;
     padding: 6rem 1rem;
 }
@@ -110,3 +114,83 @@ body {
     margin: 0 auto;
     line-height: 1.6;
 }
+
+
+/* ==============================
+   AUTH PAGE STYLES
+   ============================== */
+
+/* Main container for sign-in/sign-up forms */
+.auth-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  background: #fff8f0; /* light, warm background for friendly tone */
+  font-family: 'Poppins', sans-serif;
+  padding: 40px 20px;
+}
+
+/* The form box */
+.auth-form {
+  background: #ffffff;
+  padding: 40px 50px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Heading */
+.auth-form h2 {
+  color: #333;
+  font-size: 2rem;
+  margin-bottom: 25px;
+}
+
+/* Labels */
+.auth-form label {
+  display: block;
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #444;
+}
+
+/* Inputs */
+.auth-form input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.auth-form input:focus {
+  border-color: #e63946; /* pizza red highlight */
+  outline: none;
+}
+
+/* Submit button */
+.auth-form .btn {
+  background-color: #e63946; /* pizza red */
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s;
+}
+
+.auth-form .btn:hover {
+  background-color: #cc2e3d;
+}
+
+/* Link under the form */
+.auth-form p {
+  margin-top:
