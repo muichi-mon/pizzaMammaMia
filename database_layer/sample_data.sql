@@ -153,17 +153,19 @@ INSERT INTO PizzaIngredient (pizza_id, ingredient_id, grams) VALUES
 -- =============================================
 -- CUSTOMERS (10 customers with different ages and postcodes)
 -- =============================================
-INSERT INTO Customer (first_name, last_name, birth_date, postcode) VALUES
-('John', 'Smith', '1990-05-15', '10001'),
-('Emma', 'Johnson', '1985-08-22', '10002'),
-('Michael', 'Williams', '1978-03-10', '10003'),
-('Sarah', 'Brown', '1995-11-30', '10001'),
-('David', 'Jones', '1982-07-18', '10004'),
-('Lisa', 'Garcia', '1988-12-05', '10002'),
-('Robert', 'Martinez', '1975-09-25', '10005'),
-('Jennifer', 'Rodriguez', '1992-04-14', '10003'),
-('William', 'Davis', '1980-06-20', '10001'),
-('Maria', 'Lopez', '1998-01-08', '10004');
+-- NOTE: passwords below are plaintext placeholders for sample data only.
+-- In production you MUST store password hashes (bcrypt/argon2), not plaintext.
+INSERT INTO Customer (first_name, last_name, email, password, birth_date, postcode) VALUES
+('John', 'Smith', 'john.smith@example.com', 'Password1!', '1990-05-15', '10001'),
+('Emma', 'Johnson', 'emma.johnson@example.com', 'Password2!', '1985-08-22', '10002'),
+('Michael', 'Williams', 'michael.williams@example.com', 'Password3!', '1978-03-10', '10003'),
+('Sarah', 'Brown', 'sarah.brown@example.com', 'Password4!', '1995-11-30', '10001'),
+('David', 'Jones', 'david.jones@example.com', 'Password5!', '1982-07-18', '10004'),
+('Lisa', 'Garcia', 'lisa.garcia@example.com', 'Password6!', '1988-12-05', '10002'),
+('Robert', 'Martinez', 'robert.martinez@example.com', 'Password7!', '1975-09-25', '10005'),
+('Jennifer', 'Rodriguez', 'jennifer.rodriguez@example.com', 'Password8!', '1992-04-14', '10003'),
+('William', 'Davis', 'william.davis@example.com', 'Password9!', '1980-06-20', '10001'),
+('Maria', 'Lopez', 'maria.lopez@example.com', 'Password10!', '1998-01-08', '10004');
 
 -- =============================================
 -- DELIVERY PERSONNEL (3 delivery people)
