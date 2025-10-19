@@ -5,14 +5,17 @@
 <section class="auth-form">
     <h2>Create Account</h2>
     <form action="{{ url_for('signUp_route') }}" method="POST">
-        <label for="username">Username</label>
-        <input type="text" name="username" id="username" required>
+        <label for="first_name">First Name</label>
+        <input type="text" name="first_name" id="first_name" required>
 
-        <label for="email">Email</label>
-        <input type="email" name="email" id="email" required>
+        <label for="last_name">Last Name</label>
+        <input type="text" name="last_name" id="last_name" required>
 
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password" required>
+        <label for="birth_date">Birth Date</label>
+        <input type="date" name="birth_date" id="birth_date" required max="{{ max_birth_date }}">
+
+        <label for="postcode">Postcode</label>
+        <input type="text" name="postcode" id="postcode" pattern="\d{5}" placeholder="12345" required>
 
         <button type="submit" class="btn">Sign Up</button>
         <p>Already have an account? <a href="{{ url_for('signIn_route') }}">Sign In</a></p>
