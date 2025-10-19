@@ -3,12 +3,15 @@ CREATE TABLE Customer (
     customer_id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(80) NOT NULL,
     last_name VARCHAR(80) NOT NULL,
+    email VARCHAR(254) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
     birth_date DATE NOT NULL,
     postcode VARCHAR(20) NOT NULL,
     
     -- Constraints
     CONSTRAINT chk_birth_date CHECK (birth_date <= CURDATE()),
-    CONSTRAINT chk_postcode CHECK (postcode REGEXP '^[0-9]{5}$')
+    CONSTRAINT chk_postcode CHECK (postcode REGEXP '^[0-9]{5}$'),
+    CONSTRAINT chk_email_format CHECK (email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 );
 
 --ingredient table

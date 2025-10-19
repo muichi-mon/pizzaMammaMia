@@ -153,8 +153,7 @@ INSERT INTO PizzaIngredient (pizza_id, ingredient_id, grams) VALUES
 -- =============================================
 -- CUSTOMERS (10 customers with different ages and postcodes)
 -- =============================================
--- NOTE: passwords below are plaintext placeholders for sample data only.
--- In production you MUST store password hashes (bcrypt/argon2), not plaintext.
+--just some basic place holder passwords for now
 INSERT INTO Customer (first_name, last_name, email, password, birth_date, postcode) VALUES
 ('John', 'Smith', 'john.smith@example.com', 'Password1!', '1990-05-15', '10001'),
 ('Emma', 'Johnson', 'emma.johnson@example.com', 'Password2!', '1985-08-22', '10002'),
