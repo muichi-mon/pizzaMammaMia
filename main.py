@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request  # <-- add request here
+from flask import *
 from datetime import datetime
 
 app = Flask(__name__)
@@ -16,12 +16,19 @@ def index():
 # -----------------------------
 @app.route("/signin", methods=["GET", "POST"])
 def signIn_route():
-    if request.method == "POST":  # <-- use request here, not app.request
+    if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
-        # TODO: Validate login credentials here
-        print(f"Login attempt from {email}")
-        # For now, just reload the same page
+
+        # Example login validation
+        # Replace this with your actual user-check logic
+        if email != "test@example.com" or password != "secret":
+            # Redirect to the login_failed page if login fails
+            return redirect(url_for("login_failed_route"))
+
+        # Redirect to homepage on successful login
+        return redirect(url_for("index"))
+
     return render_template("signIn.html", current_year=datetime.now().year)
 
 # -----------------------------
@@ -36,6 +43,14 @@ def signUp_route():
         # TODO: Save user data or handle registration logic
         print(f"New signup: {username} ({email})")
     return render_template("signUp.html", current_year=datetime.now().year)
+
+# -----------------------------
+# LOGIN FAILED PAGE
+# -----------------------------
+@app.route("/login_failed")
+def login_failed_route():
+    return render_template("login_failed.html", current_year=datetime.now().year)
+
 
 # -----------------------------
 # RUN THE APP

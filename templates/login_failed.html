@@ -1,0 +1,17 @@
+{% extends "base_auth.html" %}
+{% block title %}Login Failed — Pizza Mamma Mia{% endblock %}
+
+{% block content %}
+<section class="auth-form">
+    <h2>Login Failed</h2>
+    <p>Oops! The email or password you entered is incorrect.</p>
+    <p>Please try again or create a new account.</p>
+
+    <div style="margin-top: 20px;">
+        <a href="{{ url_for('signIn_route') }}" class="btn">Try Again</a>
+        <p style="margin-top: 10px;">Don’t have an account? 
+            <a href="{{ url_for('signUp_route') }}">Sign Up</a>
+        </p>
+    </div>
+</section>
+{% endblock %}
