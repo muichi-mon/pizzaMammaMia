@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import *
 from datetime import datetime, date
 from flask_sqlalchemy import SQLAlchemy
 from ORM.Customer import Customer
@@ -10,16 +10,27 @@ os.makedirs(app.instance_path, exist_ok=True)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(app.instance_path, 'database.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = "your-secret-key"  # Required for sessions
 
 # Bind the shared db to the app
 db.init_app(app)
 with app.app_context():
-    db.create_all() # create tables if not exist
+    db.create_all()  # create tables if not exist
 
+# -----------------------------
+# HOME PAGE
+# -----------------------------
 @app.route("/")
 def index():
-    return render_template("homepage.html", current_year=datetime.now().year)
+    customer_id = session.get('customer_id')
+    customer = None
+    if customer_id:
+        customer = Customer.query.get(customer_id)
+    return render_template("homepage.html", current_year=datetime.now().year, customer=customer)
 
+# -----------------------------
+# SIGN IN PAGE
+# -----------------------------
 @app.route("/signin", methods=["GET", "POST"])
 def signIn_route():
     if request.method == "POST":
@@ -37,13 +48,20 @@ def signIn_route():
         if not customer or customer.password != password:
             return redirect(url_for("login_failed_route"))
 
+        # --- Store logged-in customer ID in session ---
+        session['customer_id'] = customer.customer_id
+
         # --- Successful login ---
+        session['customer_id'] = customer.customer_id
+        session['customer_name'] = f"{customer.first_name} {customer.last_name}"
         return redirect(url_for("index"))
 
-    # --- GET request: show login page ---
+    # GET request
     return render_template("signIn.html", current_year=datetime.now().year)
 
-
+# -----------------------------
+# SIGN UP PAGE
+# -----------------------------
 @app.route("/signup", methods=["GET", "POST"])
 def signUp_route():
     max_birth_date = date.today().isoformat()
@@ -56,7 +74,6 @@ def signUp_route():
         birth_date_str = request.form.get("birth_date")
         postcode = request.form.get("postcode")
 
-        # --- Basic validations ---
         if not all([first_name, last_name, email, password, birth_date_str, postcode]):
             return "All fields are required", 400
 
@@ -78,7 +95,7 @@ def signUp_route():
             first_name=first_name,
             last_name=last_name,
             email=email,
-            password=password,  # (plain for now — later use hash)
+            password=password,
             birth_date=birth_date,
             postcode=postcode
         )
@@ -86,19 +103,29 @@ def signUp_route():
         db.session.add(new_customer)
         db.session.commit()
 
-        # --- Redirect to sign-in page ---
         return redirect(url_for("signIn_route"))
 
-    return render_template(
-        "signUp.html",
-        current_year=datetime.now().year,
-        max_birth_date=max_birth_date
-    )
+    return render_template("signUp.html", current_year=datetime.now().year, max_birth_date=max_birth_date)
 
+# -----------------------------
+# LOGOUT
+# -----------------------------
+@app.route("/logout")
+def logout():
+    session.pop('customer_id', None)
+    session.pop('customer_name', None)
+    return redirect(url_for("index"))
+
+# -----------------------------
+# LOGIN FAILED PAGE
+# -----------------------------
 @app.route("/login_failed")
 def login_failed_route():
     return render_template("login_failed.html", current_year=datetime.now().year)
 
+# -----------------------------
+# CART SUMMARY PAGE
+# -----------------------------
 @app.route("/cart")
 def cart_summary_route():
     cart_items = [
@@ -109,14 +136,25 @@ def cart_summary_route():
     return render_template("cart_summary.html", cart_items=cart_items,
                            total_price=total_price, current_year=datetime.now().year)
 
+# -----------------------------
+# PLACE ORDER PAGE
+# -----------------------------
 @app.route("/place_order", methods=["POST"])
 def place_order_route():
-    order_success = True  # change logic if needed
-    customer_name = "John Doe"
+    order_success = True
+    customer_id = session.get('customer_id')
+    customer_name = "Guest"
+    if customer_id:
+        customer = Customer.query.get(customer_id)
+        customer_name = f"{customer.first_name} {customer.last_name}"
+
     if order_success:
         return render_template("order_success.html", customer_name=customer_name,
                                current_year=datetime.now().year)
     return render_template("order_failed.html", current_year=datetime.now().year)
 
+# -----------------------------
+# RUN APP
+# -----------------------------
 if __name__ == "__main__":
     app.run(debug=True)
