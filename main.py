@@ -2,14 +2,19 @@ import os
 from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime, date
 from flask_sqlalchemy import SQLAlchemy
-from ORM import Customer  # Your Customer model
+from ORM.Customer import Customer
+from ORM import db
 
 app = Flask(__name__, instance_relative_config=True)
 os.makedirs(app.instance_path, exist_ok=True)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(app.instance_path, 'database.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+
+# Bind the shared db to the app
+db.init_app(app)
+with app.app_context():
+    db.create_all() # create tables if not exist
 
 @app.route("/")
 def index():
@@ -20,34 +25,75 @@ def signIn_route():
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
-        if email != "test@example.com" or password != "secret":
+
+        # --- Basic validation ---
+        if not email or not password:
+            return "Both email and password are required", 400
+
+        # --- Check if customer exists ---
+        customer = Customer.query.filter_by(email=email).first()
+
+        # --- Validate credentials ---
+        if not customer or customer.password != password:
             return redirect(url_for("login_failed_route"))
+
+        # --- Successful login ---
         return redirect(url_for("index"))
+
+    # --- GET request: show login page ---
     return render_template("signIn.html", current_year=datetime.now().year)
+
 
 @app.route("/signup", methods=["GET", "POST"])
 def signUp_route():
     max_birth_date = date.today().isoformat()
+
     if request.method == "POST":
         first_name = request.form.get("first_name")
         last_name = request.form.get("last_name")
+        email = request.form.get("email")
+        password = request.form.get("password")
         birth_date_str = request.form.get("birth_date")
         postcode = request.form.get("postcode")
+
+        # --- Basic validations ---
+        if not all([first_name, last_name, email, password, birth_date_str, postcode]):
+            return "All fields are required", 400
 
         try:
             birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d").date()
         except ValueError:
-            return "Invalid birth date", 400
-        if not postcode.isdigit() or len(postcode) != 5:
-            return "Invalid postcode", 400
+            return "Invalid birth date format", 400
 
-        db.session.add(Customer(first_name=first_name, last_name=last_name,
-                                birth_date=birth_date, postcode=postcode))
+        if not postcode.isdigit() or len(postcode) != 5:
+            return "Invalid postcode format", 400
+
+        # --- Check for existing email ---
+        existing_customer = Customer.query.filter_by(email=email).first()
+        if existing_customer:
+            return "Email already registered", 400
+
+        # --- Create and save new customer ---
+        new_customer = Customer(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password,  # (plain for now — later use hash)
+            birth_date=birth_date,
+            postcode=postcode
+        )
+
+        db.session.add(new_customer)
         db.session.commit()
+
+        # --- Redirect to sign-in page ---
         return redirect(url_for("signIn_route"))
 
-    return render_template("signUp.html", current_year=datetime.now().year,
-                           max_birth_date=max_birth_date)
+    return render_template(
+        "signUp.html",
+        current_year=datetime.now().year,
+        max_birth_date=max_birth_date
+    )
 
 @app.route("/login_failed")
 def login_failed_route():
