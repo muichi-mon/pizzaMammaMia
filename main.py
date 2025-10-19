@@ -51,6 +51,31 @@ def signUp_route():
 def login_failed_route():
     return render_template("login_failed.html", current_year=datetime.now().year)
 
+# -----------------------------
+# CART SUMMARY PAGE
+# -----------------------------
+@app.route("/cart")
+def cart_summary_route():
+    cart_items = [
+        {"name": "Margherita", "quantity": 2, "price": 10},
+        {"name": "Pepperoni", "quantity": 1, "price": 12}
+    ]
+    total_price = sum(item["quantity"] * item["price"] for item in cart_items)
+    return render_template("cart_summary.html", cart_items=cart_items, total_price=total_price, current_year=datetime.now().year)
+
+# -----------------------------
+# PLACE ORDER PAGE
+# -----------------------------
+@app.route("/place_order", methods=["POST"])
+def place_order_route():
+    # Example: Replace with actual order processing logic
+    order_success = True  # or False depending on logic
+    customer_name = "John Doe"
+    if order_success:
+        return render_template("order_success.html", customer_name=customer_name, current_year=datetime.now().year)
+    else:
+        return render_template("order_failed.html", current_year=datetime.now().year)
+
 
 # -----------------------------
 # RUN THE APP

@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Pizza Planet{% endblock %}</title>
+    <title>{% block title %}Pizza Mamma Mia — Cart{% endblock %}</title>
 
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- Google Fonts (optional) -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -18,28 +17,16 @@
             <nav>
                 <ul>
                     <li><a href="{{ url_for('index') }}">Home</a></li>
-                    <li><a href="{{ url_for('cart_summary_route') }}">Cart</a></li>
                     <li><a href="{{ url_for('signIn_route') }}">Sign In</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    {% block hero %}
-    <section class="hero">
-        <div class="hero-text">
-            <h2>Hot, Fresh &amp; Delicious</h2>
-            <p>Order your favorite pizza in just a few clicks!</p>
-            <a href="{{ url_for('menu') }}" class="btn">Order Now</a>
-        </div>
-    </section>
-    {% endblock %}
-
     <!-- Main Content -->
-    <main class="content">
+    <main class="cart-content">
         {% block content %}
-        <!-- Page-specific content goes here -->
+        <!-- Page-specific cart/order content goes here -->
         {% endblock %}
     </main>
 
@@ -49,6 +36,5 @@
         <p>Contact us: (555) 123-4567 | info@pizzamammamia.com</p>
         <p>123 Main Street, Naples, Italy</p>
     </footer>
-
 </body>
 </html>
