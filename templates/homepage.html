@@ -15,26 +15,15 @@
 <section class="featured">
     <h2>Our Most Popular Pizzas</h2>
     <div class="pizza-grid">
+        {% for pizza in pizzas %}
         <div class="pizza-card">
-            <img src="{{ url_for('static', filename='images/margherita.jpg') }}" alt="Margherita">
-            <h3>Margherita</h3>
-            <p>Fresh mozzarella, tomato sauce, and basil.</p>
+            <!-- You can have a mapping from pizza name to image, or store image URL in DB -->
+            <img src="{{ url_for('static', filename='images/' ~ pizza.name|lower ~ '.jpg') }}" alt="{{ pizza.name }}">
+            <h3>{{ pizza.name }}</h3>
+            <p>Delicious {{ pizza.name }} pizza made fresh daily.</p>
             <button class="btn">Add to Cart</button>
         </div>
-
-        <div class="pizza-card">
-            <img src="{{ url_for('static', filename='images/pepperoni.jpg') }}" alt="Pepperoni">
-            <h3>Pepperoni</h3>
-            <p>A timeless favorite topped with spicy pepperoni.</p>
-            <button class="btn">Add to Cart</button>
-        </div>
-
-        <div class="pizza-card">
-            <img src="{{ url_for('static', filename='images/veggie.jpg') }}" alt="Veggie Supreme">
-            <h3>Veggie Supreme</h3>
-            <p>Loaded with farm-fresh vegetables.</p>
-            <button class="btn">Add to Cart</button>
-        </div>
+        {% endfor %}
     </div>
 </section>
 

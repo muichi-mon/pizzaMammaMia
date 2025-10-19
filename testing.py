@@ -1,22 +1,48 @@
-# test_customers.py
-from datetime import datetime
-from main import app  # your main Flask app
-from ORM.Customer import Customer
-from ORM import db
+# test_database_contents.py
+import sqlite3
+from main import app
 
-# Use the app context to access the database
-with app.app_context():
-    # Fetch all customers
-    customers = Customer.query.all()
+DB_PATH = app.config['SQLALCHEMY_DATABASE_URI'].replace("sqlite:///", "")
 
-    if not customers:
-        print("No customers found in the database.")
+
+def get_all_table_names(conn):
+    """Return a list of all tables in the SQLite database."""
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = [row[0] for row in cursor.fetchall()]
+    return tables
+
+
+def print_table_contents(conn, table_name):
+    """Print all rows from a table."""
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT * FROM {table_name}")
+    rows = cursor.fetchall()
+    columns = [desc[0] for desc in cursor.description]
+
+    print(f"\nTable: {table_name} ({len(rows)} rows)")
+    print("-" * 50)
+    for row in rows:
+        row_dict = dict(zip(columns, row))
+        for col, val in row_dict.items():
+            print(f"{col}: {val}")
+        print("-" * 20)
+    if not rows:
+        print("No rows in this table.")
+
+
+# -----------------------------
+# Main Execution
+# -----------------------------
+if __name__ == "__main__":
+    conn = sqlite3.connect(DB_PATH)
+    tables = get_all_table_names(conn)
+
+    if not tables:
+        print("No tables found in the database.")
     else:
-        print(f"Found {len(customers)} customer(s):\n")
-        for c in customers:
-            print(f"ID: {c.customer_id}")
-            print(f"Name: {c.first_name} {c.last_name}")
-            print(f"Email: {c.email}")
-            print(f"Birth Date: {c.birth_date}")
-            print(f"Postcode: {c.postcode}")
-            print("-" * 30)
+        print(f"Found {len(tables)} table(s): {tables}\n")
+        for table in tables:
+            print_table_contents(conn, table)
+
+    conn.close()

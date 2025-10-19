@@ -3,6 +3,7 @@ from flask import *
 from datetime import datetime, date
 from flask_sqlalchemy import SQLAlchemy
 from ORM.Customer import Customer
+from ORM.Pizza import Pizza
 from ORM import db
 
 app = Flask(__name__, instance_relative_config=True)
@@ -23,10 +24,17 @@ with app.app_context():
 @app.route("/")
 def index():
     customer_id = session.get('customer_id')
-    customer = None
-    if customer_id:
-        customer = Customer.query.get(customer_id)
-    return render_template("homepage.html", current_year=datetime.now().year, customer=customer)
+    customer = Customer.query.get(customer_id) if customer_id else None
+
+    # Fetch all active pizzas
+    pizzas = Pizza.query.filter_by(active=True).all()
+
+    return render_template(
+        "homepage.html",
+        current_year=datetime.now().year,
+        customer=customer,
+        pizzas=pizzas
+    )
 
 # -----------------------------
 # SIGN IN PAGE

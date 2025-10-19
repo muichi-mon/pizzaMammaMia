@@ -21,8 +21,7 @@
                     <li><a href="{{ url_for('cart_summary_route') }}">Cart</a></li>
                     {% if session.get('customer_id') %}
                         <li>
-                            Welcome, {{ session.get('customer_name') }}!
-                            <a href="{{ url_for('logout') }}">(Logout)</a>
+                            Welcome, {{ session.get('customer_name') }}!<a href="{{ url_for('logout') }}">(Logout)</a>
                         </li>
                     {% else %}
                         <li><a href="{{ url_for('signIn_route') }}">Sign In</a></li>
