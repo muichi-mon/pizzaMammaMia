@@ -183,7 +183,44 @@ INSERT INTO DiscountCode (code, description, percent_off, amount_off, single_use
 ('BDAY2024', 'Birthday special discount', 20.00, NULL, TRUE),
 ('FREEPIZZA', 'Free pizza voucher', NULL, 10.00, TRUE);
 
--- =============================================
--- ORDERS and ORDER-PIZZA tables left empty for now
--- =============================================
--- Will be populated later when implementing order functionality
+
+-- ONSEN Coffee Collection (inspired by tom)
+INSERT INTO Product (name, category, cost, is_alcohol) VALUES
+-- ONSEN Specialty Coffees
+('ONSEN Colombia Catura Chiroso', 'drink', 4.50, FALSE),
+('ONSEN Costa Rica Villa Sarchi Tono', 'drink', 4.20, FALSE),
+('ONSEN Ethiopia Guji Megadu', 'drink', 4.80, FALSE),
+('ONSEN Guatamala El Naranjo', 'drink', 4.30, FALSE),
+('Espresso', 'drink', 2.50, FALSE),
+('Cappuccino', 'drink', 3.20, FALSE),
+('Latte', 'drink', 3.50, FALSE),
+('Americano', 'drink', 2.80, FALSE),
+
+-- Soft Drinks
+('Coca-Cola 330ml', 'drink', 1.20, FALSE),
+('Sprite 330ml', 'drink', 1.20, FALSE),
+('Fanta Orange 330ml', 'drink', 1.20, FALSE),
+('Still Water 500ml', 'drink', 0.80, FALSE),
+('Sparkling Water 500ml', 'drink', 1.00, FALSE),
+('Orange Juice 250ml', 'drink', 2.00, FALSE),
+('Apple Juice 250ml', 'drink', 2.00, FALSE),
+('Iced Tea Lemon 330ml', 'drink', 1.50, FALSE),
+
+-- Beers
+('Heineken 330ml', 'drink', 2.50, TRUE),
+('Corona Extra 355ml', 'drink', 2.80, TRUE),
+('Peroni 330ml', 'drink', 2.70, TRUE),
+('Craft IPA 500ml', 'drink', 3.50, TRUE),
+('Belgian Wheat Beer 330ml', 'drink', 3.20, TRUE),
+
+-- Snacks
+('Garlic Bread (6 pieces)', 'snack', 2.50, FALSE),
+('Bruschetta (4 pieces)', 'snack', 3.20, FALSE),
+('Mozzarella Sticks (6 pieces)', 'snack', 3.50, FALSE),
+('Chicken Wings (8 pieces)', 'snack', 4.50, FALSE),
+('Caesar Salad', 'snack', 4.20, FALSE),
+('Tiramisu (slice)', 'snack', 3.80, FALSE),
+('Chocolate Brownie', 'snack', 3.20, FALSE),
+('Panna Cotta', 'snack', 3.50, FALSE),
+('Gelato (2 scoops)', 'snack', 3.00, FALSE),
+('Cheesecake (slice)', 'snack', 4.00, FALSE);
