@@ -22,8 +22,15 @@
             </div>
             {% endfor %}
         </div>
+
+        <!-- Proceed to Order Summary button -->
+        <div style="margin-top: 20px;">
+            <a href="{{ url_for('checkout_page') }}" class="btn primary">Proceed</a>
+        </div>
+
     {% else %}
         <p>No products available.</p>
     {% endif %}
 </section>
 {% endblock %}
+

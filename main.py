@@ -269,6 +269,20 @@ def products_page():
     )
 
 # -----------------------------
+# CHECKOUT PAGE
+# -----------------------------
+@app.route("/checkout")
+def checkout_page():
+    cart = session.get("cart", [])
+    total_price = sum(item["quantity"] * item["price"] for item in cart)
+    return render_template(
+        "checkout.html",
+        cart_items=cart,
+        total_price=total_price,
+        current_year=datetime.now().year
+    )
+
+# -----------------------------
 # PLACE ORDER PAGE
 # -----------------------------
 @app.route("/place_order", methods=["POST"])
