@@ -1,0 +1,29 @@
+{% extends "home_base.html" %}
+
+{% block title %}Pizza Mamma Mia — Products{% endblock %}
+
+{% block hero %}{% endblock %}
+
+{% block content %}
+<section class="products">
+    <h2>Available Products</h2>
+
+    {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <h3>{{ product.name }}</h3>
+                <p>Category: {{ product.category }}</p>
+                <p>Price: €{{ product.cost }}</p>
+                <form action="{{ url_for('add_product_to_cart', product_id=product.product_id) }}" method="POST">
+                    <input type="number" name="quantity" value="1" min="1" style="width: 60px;">
+                    <button type="submit" class="btn">Add to Cart</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No products available.</p>
+    {% endif %}
+</section>
+{% endblock %}

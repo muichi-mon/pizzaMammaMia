@@ -2,9 +2,7 @@
 
 {% block title %}Pizza Mamma Mia — Cart{% endblock %}
 
-{% block hero %}
-<!-- You can skip the hero section for the cart if you want -->
-{% endblock %}
+{% block hero %}{% endblock %}
 
 {% block content %}
 <section class="cart-summary">
@@ -32,9 +30,9 @@
             </tbody>
         </table>
         <p class="cart-total">Total: <strong>€{{ total_price }}</strong></p>
-        <form action="{{ url_for('place_order_route') }}" method="POST">
-            <button type="submit" class="btn">Place Order</button>
-        </form>
+
+        <!-- Proceed button instead of Place Order -->
+        <a href="{{ url_for('products_page') }}" class="btn">Proceed</a>
         <a href="{{ url_for('clear_cart') }}" class="btn secondary">Clear Cart</a>
     {% else %}
         <p>Your cart is empty.</p>

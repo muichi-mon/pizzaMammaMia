@@ -4,6 +4,7 @@ from datetime import datetime, date
 from flask_sqlalchemy import SQLAlchemy
 from ORM.Customer import Customer
 from ORM.Pizza import Pizza
+from ORM.Product import Product
 from ORM import db
 
 app = Flask(__name__, instance_relative_config=True)
@@ -208,6 +209,63 @@ def cart_summary_route():
         cart_items=cart,
         total_price=total_price,
         current_year=datetime.now().year
+    )
+
+# -----------------------------
+# ADD PRODUCTS PAGE
+# -----------------------------
+
+@app.route("/add_product_to_cart/<int:product_id>", methods=["POST"])
+def add_product_to_cart(product_id):
+    if "customer_id" not in session:
+        flash("Please sign in to add products to your cart.", "warning")
+        return redirect(url_for("signIn_route"))
+
+    product = Product.query.get(product_id)
+    if not product or not product.active:
+        return "Product not available", 404
+
+    quantity = int(request.form.get("quantity", 1))
+    if quantity <= 0:
+        quantity = 1
+
+    if "cart" not in session:
+        session["cart"] = []
+
+    cart = session["cart"]
+
+    # Check if product already in cart
+    for item in cart:
+        if item.get("product_id") == product_id:
+            item["quantity"] += quantity
+            break
+    else:
+        cart.append({
+            "product_id": product.product_id,
+            "name": product.name,
+            "price": float(product.cost),
+            "quantity": quantity
+        })
+
+    session["cart"] = cart
+    session.modified = True
+
+    flash(f"Added {product.name} x{quantity} to your cart!", "success")
+    return redirect(url_for("products_page"))
+
+@app.route("/products")
+def products_page():
+    customer_id = session.get("customer_id")
+    customer = Customer.query.get(customer_id) if customer_id else None
+
+    # Fetch all active products (drinks/snacks)
+    products = Product.query.filter_by(active=True).all()
+
+    return render_template(
+        "products_page.html",
+        products=products,
+        current_year=datetime.now().year,
+        customer=customer
     )
 
 # -----------------------------

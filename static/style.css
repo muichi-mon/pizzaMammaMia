@@ -461,3 +461,24 @@ a {
     font-size: 0.9rem;
   }
 }
+
+/* main button style */
+.btn {
+    padding: 10px 20px;
+    background-color: #28a745; /* green for proceed */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+/* secondary button style */
+.btn.secondary {
+    padding: 10px 20px;
+    background-color: #dc3545; /* red for clear cart */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    display: inline-block;
+}
