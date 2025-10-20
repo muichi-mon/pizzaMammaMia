@@ -279,12 +279,26 @@ def products_page():
 def checkout_page():
     cart = session.get("cart", [])
     total_price = sum(item["quantity"] * item["price"] for item in cart)
+
+    # Always define discount
+    discount = 0.0
+
+    customer_id = session.get("customer_id")
+    if customer_id:
+        customer = Customer.query.get(customer_id)
+        today = date.today()
+        if customer.birth_date.month == today.month and customer.birth_date.day == today.day:
+            discount = 0.10 * total_price
+
     return render_template(
         "checkout.html",
         cart_items=cart,
-        total_price=total_price,
+        total_price=round(total_price - discount, 2),
+        discount=round(discount, 2),
         current_year=datetime.now().year
     )
+
+
 
 # -----------------------------
 # PLACE ORDER PAGE
@@ -365,6 +379,11 @@ def place_order_route():
                 db.session.add(order_product)
 
         # 4️⃣ Update total_amount and commit transaction
+        today = date.today()
+        if customer.birth_date.month == today.month and customer.birth_date.day == today.day:
+            total_amount *= 0.9  # Apply 10% discount
+            flash("Happy Birthday! You got 10% off your order.", "success")
+
         new_order.total_amount = round(total_amount, 2)
         db.session.commit()
 

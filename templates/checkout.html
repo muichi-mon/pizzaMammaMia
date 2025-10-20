@@ -31,6 +31,9 @@
         </table>
 
         <p class="checkout-total">
+            {% if discount > 0 %}
+                Birthday Discount: -€{{ discount }}<br>
+            {% endif %}
             Total: <strong>€{{ total_price }}</strong>
         </p>
 
