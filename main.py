@@ -12,6 +12,11 @@ os.makedirs(app.instance_path, exist_ok=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(app.instance_path, 'database.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = "your-secret-key"  # Required for sessions
+app.config.update(
+    SESSION_COOKIE_PATH="/",
+    SESSION_COOKIE_SAMESITE="Lax",  # or "Strict" if you prefer
+) # ensures your session cookie is valid for all routes, not just /.
+
 
 # Bind the shared db to the app
 db.init_app(app)
@@ -132,17 +137,69 @@ def login_failed_route():
     return render_template("login_failed.html", current_year=datetime.now().year)
 
 # -----------------------------
+# ADD TO CART
+# -----------------------------
+# -----------------------------
+# ADD TO CART
+# -----------------------------
+@app.route("/add_to_cart/<int:pizza_id>", methods=["POST"])
+def add_to_cart(pizza_id):
+    # 🔒 Check if user is signed in
+    if "customer_id" not in session:
+        flash("Please sign in to add pizzas to your cart.", "warning")
+        return redirect(url_for("signIn_route"))
+
+    pizza = Pizza.query.get(pizza_id)
+    if not pizza or not pizza.active:
+        return "Pizza not available", 404
+
+    # Initialize session cart if not present
+    if "cart" not in session:
+        session["cart"] = []
+
+    # Check if pizza is already in cart
+    cart = session["cart"]
+    for item in cart:
+        if item["pizza_id"] == pizza_id:
+            item["quantity"] += 1
+            break
+    else:
+        cart.append({
+            "pizza_id": pizza.pizza_id,
+            "name": pizza.name,
+            "price": 10,  # Replace with pizza.price if you add a price column
+            "quantity": 1
+        })
+
+    session["cart"] = cart  # Save updated cart
+    session.modified = True  # Tell Flask session was updated
+
+    flash(f"Added {pizza.name} to your cart!", "success")
+    return redirect(url_for("index"))
+
+# -----------------------------
+# CLEAR CART/REMOVE PAGE
+# -----------------------------
+@app.route("/clear_cart")
+def clear_cart():
+    session.pop("cart", None)
+    flash("Your cart has been cleared.", "info")
+    return redirect(url_for("cart_summary_route"))
+
+# -----------------------------
 # CART SUMMARY PAGE
 # -----------------------------
 @app.route("/cart")
 def cart_summary_route():
-    cart_items = [
-        {"name": "Margherita", "quantity": 2, "price": 10},
-        {"name": "Pepperoni", "quantity": 1, "price": 12}
-    ]
-    total_price = sum(item["quantity"] * item["price"] for item in cart_items)
-    return render_template("cart_summary.html", cart_items=cart_items,
-                           total_price=total_price, current_year=datetime.now().year)
+    cart = session.get("cart", [])
+    total_price = sum(item["quantity"] * item["price"] for item in cart)
+
+    return render_template(
+        "cart_summary.html",
+        cart_items=cart,
+        total_price=total_price,
+        current_year=datetime.now().year
+    )
 
 # -----------------------------
 # PLACE ORDER PAGE
@@ -165,4 +222,6 @@ def place_order_route():
 # RUN APP
 # -----------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.secret_key = "your-secret-key"
+    app.run(debug=True, use_reloader=False)
+

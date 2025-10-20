@@ -21,7 +21,13 @@
             <img src="{{ url_for('static', filename='images/' ~ pizza.name|lower ~ '.jpg') }}" alt="{{ pizza.name }}">
             <h3>{{ pizza.name }}</h3>
             <p>Delicious {{ pizza.name }} pizza made fresh daily.</p>
-            <button class="btn">Add to Cart</button>
+            {% if session.get('customer_id') %}
+                <form action="{{ url_for('add_to_cart', pizza_id=pizza.pizza_id) }}" method="POST">
+                    <button type="submit" class="btn">Add to Cart</button>
+                </form>
+            {% else %}
+                <a href="{{ url_for('signIn_route') }}" class="btn btn-disabled">Sign in to Add</a>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
