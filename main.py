@@ -285,19 +285,38 @@ def checkout_page():
 # -----------------------------
 # PLACE ORDER PAGE
 # -----------------------------
+# -----------------------------
+# PLACE ORDER PAGE
+# -----------------------------
 @app.route("/place_order", methods=["POST"])
 def place_order_route():
-    order_success = True
+    cart = session.get("cart", [])
+    if not cart:
+        flash("Your cart is empty.", "warning")
+        return redirect(url_for("index"))
+
     customer_id = session.get('customer_id')
     customer_name = "Guest"
     if customer_id:
         customer = Customer.query.get(customer_id)
         customer_name = f"{customer.first_name} {customer.last_name}"
 
-    if order_success:
-        return render_template("order_success.html", customer_name=customer_name,
-                               current_year=datetime.now().year)
-    return render_template("order_failed.html", current_year=datetime.now().year)
+    # TODO: Here you can add database logic to save the order if you want
+    # For example:
+    # new_order = Order(customer_id=customer_id)
+    # db.session.add(new_order)
+    # db.session.commit()
+    # for item in cart:
+    #     order_item = OrderProduct(order_id=new_order.id, product_id=item['product_id'], quantity=item['quantity'])
+    #     db.session.add(order_item)
+    # db.session.commit()
+
+    # Clear the cart after placing the order
+    session.pop("cart", None)
+    session.modified = True
+
+    flash("Your order has been placed successfully!", "success")
+    return render_template("order_success.html", customer_name=customer_name, current_year=datetime.now().year)
 
 # -----------------------------
 # RUN APP
