@@ -144,7 +144,6 @@ def login_failed_route():
 # -----------------------------
 @app.route("/add_to_cart/<int:pizza_id>", methods=["POST"])
 def add_to_cart(pizza_id):
-    # 🔒 Check if user is signed in
     if "customer_id" not in session:
         flash("Please sign in to add pizzas to your cart.", "warning")
         return redirect(url_for("signIn_route"))
@@ -153,11 +152,20 @@ def add_to_cart(pizza_id):
     if not pizza or not pizza.active:
         return "Pizza not available", 404
 
+    # Calculate pizza price dynamically
+    # Example: sum of ingredient costs + base price
+    base_price = 5  # You can adjust this
+    total_cost = base_price
+    for pi in pizza.ingredients:
+        # Assume cost is per gram
+        total_cost += (pi.grams / 100.0) * pi.ingredient.cost  # convert grams to 100g units
+
+    pizza_price = round(total_cost, 2)  # round to 2 decimals
+
     # Initialize session cart if not present
     if "cart" not in session:
         session["cart"] = []
 
-    # Check if pizza is already in cart
     cart = session["cart"]
     for item in cart:
         if item["pizza_id"] == pizza_id:
@@ -167,15 +175,16 @@ def add_to_cart(pizza_id):
         cart.append({
             "pizza_id": pizza.pizza_id,
             "name": pizza.name,
-            "price": 10,  # Replace with pizza.price if you add a price column
+            "price": pizza_price,
             "quantity": 1
         })
 
-    session["cart"] = cart  # Save updated cart
-    session.modified = True  # Tell Flask session was updated
+    session["cart"] = cart
+    session.modified = True
 
     flash(f"Added {pizza.name} to your cart!", "success")
     return redirect(url_for("index"))
+
 
 # -----------------------------
 # CLEAR CART/REMOVE PAGE
