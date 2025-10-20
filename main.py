@@ -157,15 +157,8 @@ def add_to_cart(pizza_id):
     if not pizza or not pizza.active:
         return "Pizza not available", 404
 
-    # Calculate pizza price dynamically
-    # Example: sum of ingredient costs + base price
-    base_price = 5  # You can adjust this
-    total_cost = base_price
-    for pi in pizza.ingredients:
-        # Assume cost is per gram
-        total_cost += (pi.grams / 100.0) * pi.ingredient.cost  # convert grams to 100g units
-
-    pizza_price = round(total_cost, 2)  # round to 2 decimals
+    # Use the stored pizza price
+    pizza_price = float(pizza.price)
 
     # Initialize session cart if not present
     if "cart" not in session:

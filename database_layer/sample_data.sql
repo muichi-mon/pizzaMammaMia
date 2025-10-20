@@ -44,17 +44,17 @@ INSERT INTO Ingredient (name, cost, is_meat, is_animal_prod) VALUES
 -- =============================================
 -- PIZZAS (10 pizzas)
 -- =============================================
-INSERT INTO Pizza (name, active) VALUES
-('Margherita', TRUE),
-('Pepperoni Classic', TRUE),
-('Vegetarian Supreme', TRUE),
-('Hawaiian', TRUE),
-('BBQ Chicken', TRUE),
-('Meat Lovers', TRUE),
-('Four Cheese', TRUE),
-('Mediterranean', TRUE),
-('Spicy Diavola', TRUE),
-('Mushroom Truffle', TRUE);
+INSERT INTO Pizza (name, price, is_vegetarian, is_vegan, active) VALUES
+('Margherita', 8.99, TRUE, FALSE, TRUE),
+('Pepperoni Classic', 10.99, FALSE, FALSE, TRUE),
+('Vegetarian Supreme', 11.99, TRUE, FALSE, TRUE),
+('Hawaiian', 10.99, FALSE, FALSE, TRUE),
+('BBQ Chicken', 12.99, FALSE, FALSE, TRUE),
+('Meat Lovers', 13.99, FALSE, FALSE, TRUE),
+('Four Cheese', 11.99, TRUE, FALSE, TRUE),
+('Mediterranean', 11.99, TRUE, FALSE, TRUE),
+('Spicy Diavola', 11.99, FALSE, FALSE, TRUE),
+('Mushroom Truffle', 12.99, TRUE, FALSE, TRUE);
 
 -- =============================================
 -- PIZZA-INGREDIENT RELATIONSHIPS

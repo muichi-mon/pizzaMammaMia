@@ -30,7 +30,13 @@ CREATE TABLE Ingredient (
 CREATE TABLE Pizza (
     pizza_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(120) NOT NULL UNIQUE,
-    active BOOL DEFAULT TRUE
+    price DECIMAL(8,2) NOT NULL,
+    is_vegetarian BOOL DEFAULT FALSE,
+    is_vegan BOOL DEFAULT FALSE,
+    active BOOL DEFAULT TRUE,
+    
+    -- Constraints
+    CONSTRAINT chk_price CHECK (price > 0)
 );
 
 --pizza-ingredient table
