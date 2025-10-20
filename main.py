@@ -5,6 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 from ORM.Customer import Customer
 from ORM.Pizza import Pizza
 from ORM.Product import Product
+from ORM.OrderProduct import OrderProduct
+from ORM.OrderPizza import OrderPizza
+from ORM.Order import Order
 from ORM import db
 
 app = Flask(__name__, instance_relative_config=True)
@@ -128,6 +131,7 @@ def signUp_route():
 def logout():
     session.pop('customer_id', None)
     session.pop('customer_name', None)
+    session.pop('cart', None)
     return redirect(url_for("index"))
 
 # -----------------------------
@@ -285,9 +289,6 @@ def checkout_page():
 # -----------------------------
 # PLACE ORDER PAGE
 # -----------------------------
-# -----------------------------
-# PLACE ORDER PAGE
-# -----------------------------
 @app.route("/place_order", methods=["POST"])
 def place_order_route():
     cart = session.get("cart", [])
@@ -295,28 +296,89 @@ def place_order_route():
         flash("Your cart is empty.", "warning")
         return redirect(url_for("index"))
 
-    customer_id = session.get('customer_id')
-    customer_name = "Guest"
-    if customer_id:
-        customer = Customer.query.get(customer_id)
-        customer_name = f"{customer.first_name} {customer.last_name}"
+    customer_id = session.get("customer_id")
+    if not customer_id:
+        flash("You must sign in to place an order.", "warning")
+        return redirect(url_for("signIn_route"))
 
-    # TODO: Here you can add database logic to save the order if you want
-    # For example:
-    # new_order = Order(customer_id=customer_id)
-    # db.session.add(new_order)
-    # db.session.commit()
-    # for item in cart:
-    #     order_item = OrderProduct(order_id=new_order.id, product_id=item['product_id'], quantity=item['quantity'])
-    #     db.session.add(order_item)
-    # db.session.commit()
+    customer = Customer.query.get(customer_id)
+    customer_name = f"{customer.first_name} {customer.last_name}"
 
-    # Clear the cart after placing the order
-    session.pop("cart", None)
-    session.modified = True
+    try:
+        total_amount = 0.0
 
-    flash("Your order has been placed successfully!", "success")
-    return render_template("order_success.html", customer_name=customer_name, current_year=datetime.now().year)
+        # 1️⃣ Create Order (commit later)
+        new_order = Order(
+            customer_id=customer_id,
+            postcode_snapshot=customer.postcode,
+            total_amount=0.0,  # placeholder, calculate after items added
+            status='pending',
+            order_time=datetime.now()
+        )
+        db.session.add(new_order)
+        db.session.flush()  # Get new_order.order_id without committing
+
+        # 2️⃣ Add pizzas to OrderPizza
+        for item in cart:
+            if 'pizza_id' in item:
+                # Recalculate pizza price dynamically
+                pizza = Pizza.query.get(item['pizza_id'])
+                if not pizza or not pizza.active:
+                    continue  # skip unavailable pizzas
+
+                base_price = 5
+                pizza_price = base_price
+                for pi in pizza.ingredients:
+                    pizza_price += (pi.grams / 100.0) * pi.ingredient.cost
+                pizza_price = round(pizza_price, 2)
+
+                quantity = max(1, int(item.get('quantity', 1)))
+
+                order_pizza = OrderPizza(
+                    order_id=new_order.order_id,
+                    pizza_id=pizza.pizza_id,
+                    quantity=quantity,
+                    unit_price=pizza_price,
+                    name_snapshot=pizza.name
+                )
+                total_amount += pizza_price * quantity
+                db.session.add(order_pizza)
+
+        # 3️⃣ Add products to OrderProduct
+        for item in cart:
+            if 'product_id' in item:
+                product = Product.query.get(item['product_id'])
+                if not product or not product.active:
+                    continue  # skip unavailable products
+
+                quantity = max(1, int(item.get('quantity', 1)))
+                unit_price = float(item.get('price', product.cost))
+
+                order_product = OrderProduct(
+                    order_id=new_order.order_id,
+                    product_id=product.product_id,
+                    quantity=quantity,
+                    unit_price=unit_price,
+                    name_snapshot=product.name
+                )
+                total_amount += unit_price * quantity
+                db.session.add(order_product)
+
+        # 4️⃣ Update total_amount and commit transaction
+        new_order.total_amount = round(total_amount, 2)
+        db.session.commit()
+
+        # 5️⃣ Clear cart session
+        session.pop("cart", None)
+        session.modified = True
+
+        flash("Your order has been placed successfully!", "success")
+        return render_template("order_success.html", customer_name=customer_name, current_year=datetime.now().year)
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Failed to place the order. Error: {str(e)}", "danger")
+        return redirect(url_for("cart_summary_route"))
 
 # -----------------------------
 # RUN APP
