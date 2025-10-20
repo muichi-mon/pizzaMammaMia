@@ -18,7 +18,7 @@
         {% for pizza in pizzas %}
         <div class="pizza-card">
             <!-- You can have a mapping from pizza name to image, or store image URL in DB -->
-            <img src="{{ url_for('static', filename='images/' ~ pizza.name|lower ~ '.jpg') }}" alt="{{ pizza.name }}">
+            <img src="{{ url_for('static', filename='images/' ~ pizza.name|lower|replace(' ', '_') ~ '.jpg') }}" alt="{{ pizza.name }}">
             <h3>{{ pizza.name }}</h3>
             <p>Delicious {{ pizza.name }} pizza made fresh daily.</p>
             {% if session.get('customer_id') %}
