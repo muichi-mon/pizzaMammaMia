@@ -54,8 +54,15 @@ CREATE TABLE PizzaIngredient (
 CREATE TABLE DeliveryPerson (
     delivery_person_id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(120) NOT NULL,
-    phone VARCHAR(30) NOT NULL UNIQUE
+    phone VARCHAR(30) NOT NULL UNIQUE,
+    postcode VARCHAR(20) NOT NULL,
+    last_delivery_at DATETIME,
+    
+    -- Constraints
+    CONSTRAINT chk_dp_postcode CHECK (postcode REGEXP '^[0-9]{5}$')
 );
+
+
 
 --discount code table
 CREATE TABLE DiscountCode (
@@ -180,3 +187,5 @@ CREATE INDEX idx_ingredient_meat ON Ingredient(is_meat);
 CREATE INDEX idx_pizza_active ON Pizza(active);
 CREATE INDEX idx_product_category ON Product(category);
 CREATE INDEX idx_product_active ON Product(active);
+CREATE INDEX idx_dp_postcode ON DeliveryPerson(postcode);
+CREATE INDEX idx_dp_last_delivery ON DeliveryPerson(last_delivery_at);

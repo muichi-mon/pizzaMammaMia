@@ -169,10 +169,12 @@ INSERT INTO Customer (first_name, last_name, email, password, birth_date, postco
 -- =============================================
 -- DELIVERY PERSONNEL (3 delivery people)
 -- =============================================
-INSERT INTO DeliveryPerson (full_name, phone) VALUES
-('Tony Soprano', '+1-555-0101'),
-('Maria Rossi', '+1-555-0102'),
-('Luigi Ferrari', '+1-555-0103');
+INSERT INTO DeliveryPerson (full_name, phone, postcode, last_delivery_at) VALUES
+('Tony Soprano', '+1-555-0101', '10001', NULL),
+('Maria Rossi', '+1-555-0102', '10002', NULL),
+('Luigi Ferrari', '+1-555-0103', '10003', NULL),
+('Maria Vettel', '+1-555-0104', '10004', NULL),
+('Luigi Schumacher', '+1-555-0105', '10005', NULL);
 
 -- =============================================
 -- DISCOUNT CODES

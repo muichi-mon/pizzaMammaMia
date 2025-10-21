@@ -661,6 +661,24 @@ a {
     margin-top: 1rem;
 }
 
+.delivery-info {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: #e8f5e9;
+    border-left: 4px solid #4caf50;
+    border-radius: 5px;
+}
+
+.delivery-estimate {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #2e7d32;
+}
+
+.delivery-estimate strong {
+    color: #1b5e20;
+}
+
 /* ==============================
    PRODUCTS PAGE
    ============================== */

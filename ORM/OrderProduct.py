@@ -3,7 +3,7 @@ from .Product import Product
 
 class OrderProduct(db.Model):
     __tablename__ = "OrderProduct"
-    order_id = db.Column(db.Integer, db.ForeignKey("Order.order_id"), primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("Orders.order_id"), primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey("Product.product_id"), primary_key=True)
     quantity = db.Column(db.Integer, nullable=False)
     unit_price = db.Column(db.Float, nullable=False, default=0.0)    # new

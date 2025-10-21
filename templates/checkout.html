@@ -61,6 +61,14 @@
             <p class="checkout-total">Total: <strong>€{{ total_price }}</strong></p>
         </div>
 
+        <!-- Estimated Delivery Time -->
+        <div class="delivery-info">
+            <p class="delivery-estimate">
+                <strong>🚚 Estimated Delivery:</strong> {{ estimated_delivery_minutes }} minutes 
+                (by {{ estimated_delivery_time }})
+            </p>
+        </div>
+
         <!-- Place Order -->
         <form action="{{ url_for('place_order_route') }}" method="POST">
             <button type="submit" class="btn">Place Order</button>

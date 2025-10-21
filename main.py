@@ -1,6 +1,6 @@
 import os
 from flask import *
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from ORM.Customer import Customer
@@ -11,6 +11,7 @@ from ORM.OrderPizza import OrderPizza
 from ORM.Order import Order
 from ORM.DiscountCode import DiscountCode
 from ORM.UsedDiscountCode import UsedDiscountCode
+from ORM.DeliveryPerson import DeliveryPerson
 from ORM import db
 
 app = Flask(__name__, instance_relative_config=True)
@@ -411,6 +412,19 @@ def checkout_page():
     
     final_total = max(0, subtotal - total_discount)
     
+    # Calculate estimated delivery time
+    # Find delivery person for customer's postcode
+    delivery_person = DeliveryPerson.query.filter_by(postcode=customer.postcode).first()
+    
+    estimated_delivery_minutes = 0  # Base delivery time
+    if delivery_person and delivery_person.last_delivery_at:
+        # Calculate cooldown remaining
+        time_since_last = (datetime.now() - delivery_person.last_delivery_at).total_seconds() / 60
+        cooldown_remaining = max(0, 30 - time_since_last)
+        estimated_delivery_minutes += cooldown_remaining
+    
+    estimated_delivery_time = datetime.now() + timedelta(minutes=estimated_delivery_minutes)
+    
     return render_template(
         "checkout.html",
         cart_items=cart,
@@ -420,6 +434,8 @@ def checkout_page():
         total_price=round(final_total, 2),
         discount_code=discount_code,
         is_birthday=is_birthday,
+        estimated_delivery_minutes=int(estimated_delivery_minutes),
+        estimated_delivery_time=estimated_delivery_time.strftime("%H:%M"),
         current_year=datetime.now().year
     )
 
@@ -617,9 +633,29 @@ def place_order_route():
         new_order.total_amount = round(final_amount, 2)
         new_order.applied_discount = round(total_discount, 2)
         
+        # 5️⃣ Assign delivery person based on postcode
+        delivery_person = DeliveryPerson.query.filter_by(postcode=customer.postcode).first()
+        
+        if delivery_person:
+            # Check if delivery person is available (30 minute cooldown)
+            if delivery_person.last_delivery_at:
+                time_since_last = (datetime.now() - delivery_person.last_delivery_at).total_seconds() / 60
+                if time_since_last < 30:
+                    # Delivery person is in cooldown, order will wait
+                    flash(f"Your delivery will be delayed by {int(30 - time_since_last)} minutes due to driver availability.", "info")
+            
+            new_order.delivery_person_id = delivery_person.delivery_person_id
+            new_order.status = 'preparing'
+            
+            # Update delivery person's last_delivery_at to current time (start of delivery)
+            delivery_person.last_delivery_at = datetime.now()
+        else:
+            # No delivery person for this postcode
+            flash(f"Warning: No delivery person assigned for postcode {customer.postcode}. Order placed as pending.", "warning")
+        
         db.session.commit()
 
-        # 5️⃣ Clear cart and discount code from session
+        # 6️⃣ Clear cart and discount code from session
         session.pop("cart", None)
         session.pop("discount_code", None)
         session.modified = True

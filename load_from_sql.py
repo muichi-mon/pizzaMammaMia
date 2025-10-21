@@ -203,11 +203,6 @@ def load_from_sql_files():
     sqlite_schema = mysql_to_sqlite_schema(mysql_schema)
     print("✓ Translated MySQL syntax to SQLite syntax")
     
-    # Debug: save translated schema
-    with open('debug_schema.sql', 'w', encoding='utf-8') as f:
-        f.write(sqlite_schema)
-    print("✓ Saved translated schema to debug_schema.sql for inspection")
-    
     # Execute schema - split by semicolon and execute each statement
     statements = sqlite_schema.split(';')
     tables_created = 0
@@ -346,11 +341,6 @@ def load_from_sql_files():
         # Translate to SQLite
         sqlite_views = mysql_to_sqlite_views(mysql_views)
         print("✓ Translated MySQL view syntax to SQLite syntax")
-        
-        # Debug: save translated views
-        with open('debug_views.sql', 'w', encoding='utf-8') as f:
-            f.write(sqlite_views)
-        print("✓ Saved translated views to debug_views.sql for inspection")
         
         # Execute view creation
         views_created = 0

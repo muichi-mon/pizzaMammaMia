@@ -64,10 +64,17 @@ CREATE VIEW IF NOT EXISTS AvailableDeliveryPersonnel AS
 SELECT 
     delivery_person_id,
     full_name,
-    phone
-FROM DeliveryPerson;
--- TODO: Add last_delivery_at field to DeliveryPerson table and filter by:
--- WHERE last_delivery_at IS NULL OR last_delivery_at <= DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+    phone,
+    postcode,
+    last_delivery_at,
+    CASE 
+        WHEN last_delivery_at IS NULL THEN 0
+        WHEN TIMESTAMPDIFF(MINUTE, last_delivery_at, NOW()) >= 30 THEN 0
+        ELSE 30 - TIMESTAMPDIFF(MINUTE, last_delivery_at, NOW())
+    END AS cooldown_minutes_remaining
+FROM DeliveryPerson
+WHERE last_delivery_at IS NULL 
+   OR TIMESTAMPDIFF(MINUTE, last_delivery_at, NOW()) >= 30;
 
 
 -- Undelivered Orders View

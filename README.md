@@ -1,25 +1,20 @@
 # Pizza Mamma Mia System
 
-## TODO List:
-- [ ] Design ERD
-- [ ] Create database schema
-- [ ] Add sample data  
-- [ ] Write business queries
-- [ ] Implement services
-- [ ] Build console interface
-- [ ] Test all features
-
-## Core Features:
-✅ Folder structure created
-⏳ Menu & Pricing (dynamic calculation)
-⏳ Customer & Order Management
-⏳ Discounts & Loyalty
-⏳ Delivery Assignment
-⏳ Staff Reports
-⏳ Database Transactions
 
 ## Usage:
-1. Set up `.env` file with database credentials
-2. Run `pip install -r requirements.txt`
-3. Execute `schema.sql` and `sample_data.sql`
-4. Run `python programming_layer/main_app.py`
+1. Run `pip install -r requirements.txt`
+2. run `load_drom_sql.py`
+3. Run `main_app.py`
+
+## Key features
+- Pizza prices calculated dynamically from ingredients (rounded to 2 dp).
+- Discounts:
+  - Birthday: 1 free cheapest pizza from the order + 1 free cheapest drink.
+  - Loyalty: 10% off after customer has bought 10 pizzas (tracked over time).
+  - One-time discount codes (single-use tracked).
+- Delivery:
+  - Delivery personnel assigned to postcode areas.
+  - Orders assigned to delivery person by customer's postcode.
+  - Delivery person cooldown (30 minutes after a delivery).
+  - Delivery status tracked and visible.
+- Business views (PizzaMenu, CustomerLoyalty, etc.) provide calculated/aggregated data.
