@@ -1,6 +1,6 @@
 from datetime import date
 from sqlalchemy import CheckConstraint
-from . import db  # import shared db instance
+from . import db 
 
 class Customer(db.Model):
     __tablename__ = 'Customer'

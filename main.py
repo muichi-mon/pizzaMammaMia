@@ -35,8 +35,23 @@ def index():
     customer_id = session.get('customer_id')
     customer = Customer.query.get(customer_id) if customer_id else None
 
-    # Fetch all active pizzas
-    pizzas = Pizza.query.filter_by(active=True).all()
+    # Fetch all active pizzas with calculated prices from the PizzaMenu view
+    result = db.session.execute(db.text("""
+        SELECT pizza_id, name, price, is_vegetarian, is_vegan
+        FROM PizzaMenu
+        WHERE active = 1
+    """))
+    
+    # Convert to list of dictionaries for easy template access
+    pizzas = []
+    for row in result:
+        pizzas.append({
+            'pizza_id': row[0],
+            'name': row[1],
+            'price': row[2],
+            'is_vegetarian': row[3],
+            'is_vegan': row[4]
+        })
 
     return render_template(
         "homepage.html",
@@ -157,8 +172,18 @@ def add_to_cart(pizza_id):
     if not pizza or not pizza.active:
         return "Pizza not available", 404
 
-    # Use the stored pizza price
-    pizza_price = float(pizza.price)
+    # Calculate pizza price dynamically from PizzaMenu view
+    pizza_data = db.session.execute(db.text("""
+        SELECT price, name
+        FROM PizzaMenu
+        WHERE pizza_id = :pizza_id
+    """), {"pizza_id": pizza_id}).fetchone()
+    
+    if not pizza_data:
+        return "Pizza not found", 404
+    
+    pizza_price = float(pizza_data[0])
+    pizza_name = pizza_data[1]
 
     # Initialize session cart if not present
     if "cart" not in session:
@@ -172,7 +197,7 @@ def add_to_cart(pizza_id):
     else:
         cart.append({
             "pizza_id": pizza.pizza_id,
-            "name": pizza.name,
+            "name": pizza_name,
             "price": pizza_price,
             "quantity": 1
         })
@@ -180,7 +205,7 @@ def add_to_cart(pizza_id):
     session["cart"] = cart
     session.modified = True
 
-    flash(f"Added {pizza.name} to your cart!", "success")
+    flash(f"Added {pizza_name} to your cart!", "success")
     return redirect(url_for("index"))
 
 

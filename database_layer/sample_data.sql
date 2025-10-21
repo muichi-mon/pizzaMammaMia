@@ -44,17 +44,17 @@ INSERT INTO Ingredient (name, cost, is_meat, is_animal_prod) VALUES
 -- =============================================
 -- PIZZAS (10 pizzas)
 -- =============================================
-INSERT INTO Pizza (name, price, is_vegetarian, is_vegan, active) VALUES
-('Margherita', 8.99, TRUE, FALSE, TRUE),
-('Pepperoni Classic', 10.99, FALSE, FALSE, TRUE),
-('Vegetarian Supreme', 11.99, TRUE, FALSE, TRUE),
-('Hawaiian', 10.99, FALSE, FALSE, TRUE),
-('BBQ Chicken', 12.99, FALSE, FALSE, TRUE),
-('Meat Lovers', 13.99, FALSE, FALSE, TRUE),
-('Four Cheese', 11.99, TRUE, FALSE, TRUE),
-('Mediterranean', 11.99, TRUE, FALSE, TRUE),
-('Spicy Diavola', 11.99, FALSE, FALSE, TRUE),
-('Mushroom Truffle', 12.99, TRUE, FALSE, TRUE);
+INSERT INTO Pizza (name, active) VALUES
+('Margherita', TRUE),
+('Pepperoni Classic', TRUE),
+('Vegetarian Supreme', TRUE),
+('Hawaiian', TRUE),
+('BBQ Chicken', TRUE),
+('Meat Lovers', TRUE),
+('Four Cheese', TRUE),
+('Mediterranean', TRUE),
+('Spicy Diavola', TRUE),
+('Mushroom Truffle', TRUE);
 
 -- =============================================
 -- PIZZA-INGREDIENT RELATIONSHIPS
@@ -155,7 +155,7 @@ INSERT INTO PizzaIngredient (pizza_id, ingredient_id, grams) VALUES
 -- =============================================
 --just some basic place holder passwords for now
 INSERT INTO Customer (first_name, last_name, email, password, birth_date, postcode) VALUES
-('John', 'Smith', 'john.smith@example.com', 'Password1!', '1990-05-15', '10001'),
+('John', 'Smith', 'john.smith@example.com', 'Password1!', '1990-10-21', '10001'),
 ('Emma', 'Johnson', 'emma.johnson@example.com', 'Password2!', '1985-08-22', '10002'),
 ('Michael', 'Williams', 'michael.williams@example.com', 'Password3!', '1978-03-10', '10003'),
 ('Sarah', 'Brown', 'sarah.brown@example.com', 'Password4!', '1995-11-30', '10001'),
@@ -185,43 +185,32 @@ INSERT INTO DiscountCode (code, description, percent_off, amount_off, single_use
 ('FREEPIZZA', 'Free pizza voucher', NULL, 10.00, TRUE);
 
 
+-- =============================================
+-- PRODUCTS (drinks and snacks)
+-- =============================================
 -- ONSEN Coffee Collection (inspired by tom)
 INSERT INTO Product (name, category, cost, is_alcohol) VALUES
 -- ONSEN Specialty Coffees
-('ONSEN Colombia Catura Chiroso', 'drink', 4.50, FALSE),
-('ONSEN Costa Rica Villa Sarchi Tono', 'drink', 4.20, FALSE),
-('ONSEN Ethiopia Guji Megadu', 'drink', 4.80, FALSE),
-('ONSEN Guatamala El Naranjo', 'drink', 4.30, FALSE),
-('Espresso', 'drink', 2.50, FALSE),
-('Cappuccino', 'drink', 3.20, FALSE),
-('Latte', 'drink', 3.50, FALSE),
-('Americano', 'drink', 2.80, FALSE),
+('ONSEN Colombia Catura Chiroso', 'drink', 14.50, FALSE),
+('ONSEN Costa Rica Villa Sarchi Tono', 'drink', 14.20, FALSE),
+('ONSEN Ethiopia Guji Megadu', 'drink', 14.80, FALSE),
+('ONSEN Guatamala El Naranjo', 'drink', 14.30, FALSE),
+
 
 -- Soft Drinks
 ('Coca-Cola 330ml', 'drink', 1.20, FALSE),
 ('Sprite 330ml', 'drink', 1.20, FALSE),
 ('Fanta Orange 330ml', 'drink', 1.20, FALSE),
 ('Still Water 500ml', 'drink', 0.80, FALSE),
-('Sparkling Water 500ml', 'drink', 1.00, FALSE),
-('Orange Juice 250ml', 'drink', 2.00, FALSE),
-('Apple Juice 250ml', 'drink', 2.00, FALSE),
-('Iced Tea Lemon 330ml', 'drink', 1.50, FALSE),
+
 
 -- Beers
 ('Heineken 330ml', 'drink', 2.50, TRUE),
 ('Corona Extra 355ml', 'drink', 2.80, TRUE),
-('Peroni 330ml', 'drink', 2.70, TRUE),
-('Craft IPA 500ml', 'drink', 3.50, TRUE),
-('Belgian Wheat Beer 330ml', 'drink', 3.20, TRUE),
 
 -- Snacks
 ('Garlic Bread (6 pieces)', 'snack', 2.50, FALSE),
 ('Bruschetta (4 pieces)', 'snack', 3.20, FALSE),
 ('Mozzarella Sticks (6 pieces)', 'snack', 3.50, FALSE),
-('Chicken Wings (8 pieces)', 'snack', 4.50, FALSE),
-('Caesar Salad', 'snack', 4.20, FALSE),
-('Tiramisu (slice)', 'snack', 3.80, FALSE),
-('Chocolate Brownie', 'snack', 3.20, FALSE),
-('Panna Cotta', 'snack', 3.50, FALSE),
-('Gelato (2 scoops)', 'snack', 3.00, FALSE),
 ('Cheesecake (slice)', 'snack', 4.00, FALSE);
+

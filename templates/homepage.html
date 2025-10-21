@@ -18,17 +18,17 @@
         {% for pizza in pizzas %}
         <div class="pizza-card">
             <!-- You can have a mapping from pizza name to image, or store image URL in DB -->
-            <img src="{{ url_for('static', filename='images/' ~ pizza.name|lower|replace(' ', '_') ~ '.jpg') }}" alt="{{ pizza.name }}">
-            <h3>{{ pizza.name }}</h3>
-            <p class="pizza-price">€{{ "%.2f"|format(pizza.price) }}</p>
-            <p class="pizza-description">Delicious {{ pizza.name }} pizza made fresh daily.</p>
-            {% if pizza.is_vegan %}
+            <img src="{{ url_for('static', filename='images/' ~ pizza['name']|lower|replace(' ', '_') ~ '.jpg') }}" alt="{{ pizza['name'] }}">
+            <h3>{{ pizza['name'] }}</h3>
+            <p class="pizza-price">€{{ "%.2f"|format(pizza['price']) }}</p>
+            <p class="pizza-description">Delicious {{ pizza['name'] }} pizza made fresh daily.</p>
+            {% if pizza['is_vegan'] %}
                 <span class="dietary-badge vegan">🌱 Vegan</span>
-            {% elif pizza.is_vegetarian %}
+            {% elif pizza['is_vegetarian'] %}
                 <span class="dietary-badge vegetarian">🥬 Vegetarian</span>
             {% endif %}
             {% if session.get('customer_id') %}
-                <form action="{{ url_for('add_to_cart', pizza_id=pizza.pizza_id) }}" method="POST">
+                <form action="{{ url_for('add_to_cart', pizza_id=pizza['pizza_id']) }}" method="POST">
                     <button type="submit" class="btn">Add to Cart</button>
                 </form>
             {% else %}
