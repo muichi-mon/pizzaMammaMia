@@ -12,6 +12,7 @@ class Customer(db.Model):
     password = db.Column(db.String(255), nullable=False)
     birth_date = db.Column(db.Date, nullable=False)
     postcode = db.Column(db.String(20), nullable=False)
+    gender = db.Column(db.String(10), nullable=False)
 
     __table_args__ = (
         CheckConstraint('birth_date <= CURRENT_DATE', name='chk_birth_date'),

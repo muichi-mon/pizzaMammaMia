@@ -7,6 +7,7 @@ CREATE TABLE Customer (
     password VARCHAR(255) NOT NULL,
     birth_date DATE NOT NULL,
     postcode VARCHAR(20) NOT NULL,
+    gender ENUM('M', 'F', 'Other') NOT NULL,
     
     -- Constraints
     CONSTRAINT chk_birth_date CHECK (birth_date <= CURDATE()),

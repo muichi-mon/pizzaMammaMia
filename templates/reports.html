@@ -1,0 +1,174 @@
+{% extends "home_base.html" %}
+
+{% block title %}Reports (Employees) - Pizza Mamma Mia{% endblock %}
+
+{% block hero %}
+<section class="hero">
+    <div class="hero-text">
+        <h2>📊 Business Reports</h2>
+        <p>View orders, sales analytics, and customer insights</p>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<section class="reports-section">
+    <div class="container">
+        <!-- Tab Navigation -->
+        <div class="report-tabs">
+            <a href="{{ url_for('reports_page', type='undelivered') }}" 
+               class="report-tab {% if report_type == 'undelivered' %}active{% endif %}">
+                📦 Undelivered Orders
+            </a>
+            <a href="{{ url_for('reports_page', type='top_pizzas') }}" 
+               class="report-tab {% if report_type == 'top_pizzas' %}active{% endif %}">
+                🍕 Top Pizzas (Past Month)
+            </a>
+            <a href="{{ url_for('reports_page', type='earnings') }}" 
+               class="report-tab {% if report_type == 'earnings' %}active{% endif %}">
+                💰 Earnings Report
+            </a>
+        </div>
+
+        <!-- Report Content -->
+        <div class="report-content">
+            {% if report_type == 'undelivered' %}
+                <!-- UNDELIVERED ORDERS -->
+                <h2>📦 Undelivered Orders</h2>
+                {% if undelivered_orders %}
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Order Time</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                                <th>Delivery Person</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in undelivered_orders %}
+                            <tr>
+                                <td>#{{ order.order_id }}</td>
+                                <td>{{ order.customer_name }}</td>
+                                <td>{{ order.order_time }}</td>
+                                <td>€{{ "%.2f"|format(order.total_amount) }}</td>
+                                <td><span class="status-badge status-{{ order.status }}">{{ order.status }}</span></td>
+                                <td>{{ order.delivery_person_name or 'Not Assigned' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="no-data">✅ All orders have been delivered!</p>
+                {% endif %}
+
+            {% elif report_type == 'top_pizzas' %}
+                <!-- TOP PIZZAS -->
+                <h2>🍕 Top 3 Pizzas Sold (Past Month)</h2>
+                {% if top_pizzas %}
+                    <div class="top-pizzas-grid">
+                        {% for pizza in top_pizzas %}
+                        <div class="top-pizza-card">
+                            <div class="rank-badge">#{{ loop.index }}</div>
+                            <h3>{{ pizza.pizza_name }}</h3>
+                            <p class="pizza-stats">
+                                <strong>{{ pizza.total_sold }}</strong> pizzas sold<br>
+                                <strong>€{{ "%.2f"|format(pizza.total_revenue) }}</strong> revenue
+                            </p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="no-data">No pizza sales in the past month.</p>
+                {% endif %}
+
+            {% elif report_type == 'earnings' %}
+                <!-- EARNINGS REPORT -->
+                <h2>💰 Earnings Report (Past Month)</h2>
+                
+                <!-- Filters -->
+                <form method="GET" action="{{ url_for('reports_page') }}" class="filters-form">
+                    <input type="hidden" name="type" value="earnings">
+                    
+                    <div class="filter-group">
+                        <label for="gender">Gender:</label>
+                        <select name="gender" id="gender" onchange="this.form.submit()">
+                            <option value="all" {% if gender_filter == 'all' %}selected{% endif %}>All</option>
+                            <option value="M" {% if gender_filter == 'M' %}selected{% endif %}>Male</option>
+                            <option value="F" {% if gender_filter == 'F' %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="age">Age Group:</label>
+                        <select name="age" id="age" onchange="this.form.submit()">
+                            <option value="all" {% if age_filter == 'all' %}selected{% endif %}>All</option>
+                            <option value="under_25" {% if age_filter == 'under_25' %}selected{% endif %}>Under 25</option>
+                            <option value="25_40" {% if age_filter == '25_40' %}selected{% endif %}>25-40</option>
+                            <option value="over_40" {% if age_filter == 'over_40' %}selected{% endif %}>Over 40</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="postcode">Postcode:</label>
+                        <select name="postcode" id="postcode" onchange="this.form.submit()">
+                            <option value="all" {% if postcode_filter == 'all' %}selected{% endif %}>All</option>
+                            {% for postcode in postcode_list %}
+                            <option value="{{ postcode }}" {% if postcode_filter == postcode %}selected{% endif %}>{{ postcode }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-filter">Apply Filters</button>
+                </form>
+
+                {% if earnings %}
+                    <div class="earnings-summary">
+                        <div class="summary-card">
+                            <h3>Total Customers</h3>
+                            <p class="summary-value">{{ earnings|length }}</p>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Total Revenue</h3>
+                            <p class="summary-value">€{{ "%.2f"|format(earnings|sum(attribute='total_spent')) }}</p>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Total Orders</h3>
+                            <p class="summary-value">{{ earnings|sum(attribute='total_orders') }}</p>
+                        </div>
+                    </div>
+
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Gender</th>
+                                <th>Age</th>
+                                <th>Postcode</th>
+                                <th>Orders</th>
+                                <th>Total Spent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for customer in earnings %}
+                            <tr>
+                                <td>{{ customer.customer_name }}</td>
+                                <td>{{ customer.gender }}</td>
+                                <td>{{ customer.age }}</td>
+                                <td>{{ customer.postcode }}</td>
+                                <td>{{ customer.total_orders }}</td>
+                                <td>€{{ "%.2f"|format(customer.total_spent) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="no-data">No earnings data available for the selected filters.</p>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

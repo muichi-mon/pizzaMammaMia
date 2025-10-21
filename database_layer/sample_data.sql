@@ -154,17 +154,17 @@ INSERT INTO PizzaIngredient (pizza_id, ingredient_id, grams) VALUES
 -- CUSTOMERS (10 customers with different ages and postcodes)
 -- =============================================
 --just some basic place holder passwords for now
-INSERT INTO Customer (first_name, last_name, email, password, birth_date, postcode) VALUES
-('John', 'Smith', 'john.smith@example.com', 'Password1!', '1990-10-21', '10001'),
-('Emma', 'Johnson', 'emma.johnson@example.com', 'Password2!', '1985-08-22', '10002'),
-('Michael', 'Williams', 'michael.williams@example.com', 'Password3!', '1978-03-10', '10003'),
-('Sarah', 'Brown', 'sarah.brown@example.com', 'Password4!', '1995-11-30', '10001'),
-('David', 'Jones', 'david.jones@example.com', 'Password5!', '1982-07-18', '10004'),
-('Lisa', 'Garcia', 'lisa.garcia@example.com', 'Password6!', '1988-12-05', '10002'),
-('Robert', 'Martinez', 'robert.martinez@example.com', 'Password7!', '1975-09-25', '10005'),
-('Jennifer', 'Rodriguez', 'jennifer.rodriguez@example.com', 'Password8!', '1992-04-14', '10003'),
-('William', 'Davis', 'william.davis@example.com', 'Password9!', '1980-06-20', '10001'),
-('Maria', 'Lopez', 'maria.lopez@example.com', 'Password10!', '1998-01-08', '10004');
+INSERT INTO Customer (first_name, last_name, email, password, birth_date, postcode, gender) VALUES
+('John', 'Smith', 'john.smith@example.com', 'Password1!', '1990-10-21', '10001', 'M'),
+('Emma', 'Johnson', 'emma.johnson@example.com', 'Password2!', '1985-08-22', '10002', 'F'),
+('Michael', 'Williams', 'michael.williams@example.com', 'Password3!', '1978-03-10', '10003', 'M'),
+('Sarah', 'Brown', 'sarah.brown@example.com', 'Password4!', '1995-11-30', '10001', 'F'),
+('David', 'Jones', 'david.jones@example.com', 'Password5!', '1982-07-18', '10004', 'M'),
+('Lisa', 'Garcia', 'lisa.garcia@example.com', 'Password6!', '1988-12-05', '10002', 'F'),
+('Robert', 'Martinez', 'robert.martinez@example.com', 'Password7!', '1975-09-25', '10005', 'M'),
+('Jennifer', 'Rodriguez', 'jennifer.rodriguez@example.com', 'Password8!', '1992-04-14', '10003', 'F'),
+('William', 'Davis', 'william.davis@example.com', 'Password9!', '1980-06-20', '10001', 'M'),
+('Maria', 'Lopez', 'maria.lopez@example.com', 'Password10!', '1998-01-08', '10004', 'F');
 
 -- =============================================
 -- DELIVERY PERSONNEL (3 delivery people)
@@ -213,4 +213,224 @@ INSERT INTO Product (name, category, cost, is_alcohol) VALUES
 ('Bruschetta (4 pieces)', 'snack', 3.20, FALSE),
 ('Mozzarella Sticks (6 pieces)', 'snack', 3.50, FALSE),
 ('Cheesecake (slice)', 'snack', 4.00, FALSE);
+
+
+-- =============================================
+-- SAMPLE ORDERS (20 orders from past month)
+-- =============================================
+
+-- Order 1: John Smith (10001) - 30 days ago - 2 Margheritas, Coca-Cola - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(1, '10001', 18.40, 'delivered', DATE('now', '-30 days', '+14 hours'), DATE('now', '-30 days', '+15 hours'), 1, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(1, 1, 2, 8.50, 'Margherita');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(1, 5, 1, 1.20, 'Coca-Cola 330ml');
+
+-- Order 2: Emma Johnson (10002) - 28 days ago - Pepperoni, Water - Delivered with LOYAL15 discount
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(2, '10002', 8.41, 'delivered', DATE('now', '-28 days', '+12 hours'), DATE('now', '-28 days', '+13 hours'), 2, 'LOYAL15', 1.49);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(2, 2, 1, 8.70, 'Pepperoni Classic');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(2, 8, 1, 0.80, 'Still Water 500ml');
+
+INSERT INTO UsedDiscountCode (customer_id, code, order_id, used_at) VALUES
+(2, 'LOYAL15', 2, DATE('now', '-28 days', '+12 hours'));
+
+-- Order 3: Michael Williams (10003) - 27 days ago - Hawaiian, Sprite - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(3, '10003', 10.40, 'delivered', DATE('now', '-27 days', '+18 hours'), DATE('now', '-27 days', '+19 hours'), 3, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(3, 4, 1, 9.20, 'Hawaiian');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(3, 6, 1, 1.20, 'Sprite 330ml');
+
+-- Order 4: Sarah Brown (10001) - 25 days ago - 3 Vegetarian Supreme - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(4, '10001', 27.90, 'delivered', DATE('now', '-25 days', '+19 hours'), DATE('now', '-25 days', '+20 hours'), 1, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(4, 3, 3, 9.30, 'Vegetarian Supreme');
+
+-- Order 5: David Jones (10004) - 24 days ago - BBQ Chicken, Garlic Bread, Heineken - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(5, '10004', 15.20, 'delivered', DATE('now', '-24 days', '+20 hours'), DATE('now', '-24 days', '+21 hours'), 4, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(5, 5, 1, 10.20, 'BBQ Chicken');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(5, 11, 1, 2.50, 'Garlic Bread (6 pieces)'),
+(5, 9, 1, 2.50, 'Heineken 330ml');
+
+-- Order 6: Lisa Garcia (10002) - 22 days ago - Meat Lovers, 2 Corona - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(6, '10002', 17.90, 'delivered', DATE('now', '-22 days', '+21 hours'), DATE('now', '-22 days', '+22 hours'), 2, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(6, 6, 1, 12.30, 'Meat Lovers');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(6, 10, 2, 2.80, 'Corona Extra 355ml');
+
+-- Order 7: Robert Martinez (10005) - 20 days ago - Four Cheese, Mushroom Truffle - Delivered with SAVE5
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(7, '10005', 17.60, 'delivered', DATE('now', '-20 days', '+13 hours'), DATE('now', '-20 days', '+14 hours'), 5, 'SAVE5', 5.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(7, 7, 1, 11.30, 'Four Cheese'),
+(7, 10, 1, 11.30, 'Mushroom Truffle');
+
+INSERT INTO UsedDiscountCode (customer_id, code, order_id, used_at) VALUES
+(7, 'SAVE5', 7, DATE('now', '-20 days', '+13 hours'));
+
+-- Order 8: Jennifer Rodriguez (10003) - 18 days ago - Mediterranean, Water - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(8, '10003', 11.30, 'delivered', DATE('now', '-18 days', '+19 hours'), DATE('now', '-18 days', '+20 hours'), 3, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(8, 8, 1, 10.50, 'Mediterranean');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(8, 8, 1, 0.80, 'Still Water 500ml');
+
+-- Order 9: William Davis (10001) - 17 days ago - 2 Spicy Diavola, Fanta, Cheesecake - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(9, '10001', 24.10, 'delivered', DATE('now', '-17 days', '+20 hours'), DATE('now', '-17 days', '+21 hours'), 1, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(9, 9, 2, 9.50, 'Spicy Diavola');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(9, 7, 1, 1.20, 'Fanta Orange 330ml'),
+(9, 14, 1, 4.00, 'Cheesecake (slice)');
+
+-- Order 10: Maria Lopez (10004) - 15 days ago - Margherita, Pepperoni, ONSEN Coffee - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(10, '10004', 31.70, 'delivered', DATE('now', '-15 days', '+12 hours'), DATE('now', '-15 days', '+13 hours'), 4, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(10, 1, 1, 8.50, 'Margherita'),
+(10, 2, 1, 8.70, 'Pepperoni Classic');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(10, 1, 1, 14.50, 'ONSEN Colombia Catura Chiroso');
+
+-- Order 11: John Smith (10001) - 14 days ago - Hawaiian, Meat Lovers, 2 Heineken - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(1, '10001', 26.50, 'delivered', DATE('now', '-14 days', '+18 hours'), DATE('now', '-14 days', '+19 hours'), 1, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(11, 4, 1, 9.20, 'Hawaiian'),
+(11, 6, 1, 12.30, 'Meat Lovers');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(11, 9, 2, 2.50, 'Heineken 330ml');
+
+-- Order 12: Emma Johnson (10002) - 12 days ago - 2 Vegetarian Supreme, Bruschetta - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(2, '10002', 21.80, 'delivered', DATE('now', '-12 days', '+19 hours'), DATE('now', '-12 days', '+20 hours'), 2, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(12, 3, 2, 9.30, 'Vegetarian Supreme');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(12, 12, 1, 3.20, 'Bruschetta (4 pieces)');
+
+-- Order 13: Michael Williams (10003) - 10 days ago - BBQ Chicken, Mozzarella Sticks, Coca-Cola - Delivered with LOYAL15
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(3, '10003', 13.39, 'delivered', DATE('now', '-10 days', '+20 hours'), DATE('now', '-10 days', '+21 hours'), 3, 'LOYAL15', 2.36);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(13, 5, 1, 10.20, 'BBQ Chicken');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(13, 13, 1, 3.50, 'Mozzarella Sticks (6 pieces)'),
+(13, 5, 1, 1.20, 'Coca-Cola 330ml');
+
+-- Order 14: Sarah Brown (10001) - 8 days ago - Four Cheese, Sprite - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(4, '10001', 12.50, 'delivered', DATE('now', '-8 days', '+17 hours'), DATE('now', '-8 days', '+18 hours'), 1, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(14, 7, 1, 11.30, 'Four Cheese');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(14, 6, 1, 1.20, 'Sprite 330ml');
+
+-- Order 15: David Jones (10004) - 7 days ago - 2 Margherita, Mediterranean, 3 Corona - Delivered with FREEPIZZA
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(5, '10004', 27.40, 'delivered', DATE('now', '-7 days', '+19 hours'), DATE('now', '-7 days', '+20 hours'), 4, 'FREEPIZZA', 10.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(15, 1, 2, 8.50, 'Margherita'),
+(15, 8, 1, 10.50, 'Mediterranean');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(15, 10, 3, 2.80, 'Corona Extra 355ml');
+
+INSERT INTO UsedDiscountCode (customer_id, code, order_id, used_at) VALUES
+(5, 'FREEPIZZA', 15, DATE('now', '-7 days', '+19 hours'));
+
+-- Order 16: Lisa Garcia (10002) - 5 days ago - Spicy Diavola, Garlic Bread, Water - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(6, '10002', 13.00, 'delivered', DATE('now', '-5 days', '+18 hours'), DATE('now', '-5 days', '+19 hours'), 2, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(16, 9, 1, 9.50, 'Spicy Diavola');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(16, 11, 1, 2.50, 'Garlic Bread (6 pieces)'),
+(16, 8, 1, 0.80, 'Still Water 500ml');
+
+-- Order 17: Robert Martinez (10005) - 4 days ago - Pepperoni, Hawaiian, ONSEN Ethiopia - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(7, '10005', 32.40, 'delivered', DATE('now', '-4 days', '+14 hours'), DATE('now', '-4 days', '+15 hours'), 5, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(17, 2, 1, 8.70, 'Pepperoni Classic'),
+(17, 4, 1, 9.20, 'Hawaiian');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(17, 3, 1, 14.80, 'ONSEN Ethiopia Guji Megadu');
+
+-- Order 18: Jennifer Rodriguez (10003) - 3 days ago - Mushroom Truffle, Fanta, Cheesecake - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(8, '10003', 16.50, 'delivered', DATE('now', '-3 days', '+18 hours'), DATE('now', '-3 days', '+19 hours'), 3, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(18, 10, 1, 11.30, 'Mushroom Truffle');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(18, 7, 1, 1.20, 'Fanta Orange 330ml'),
+(18, 14, 1, 4.00, 'Cheesecake (slice)');
+
+-- Order 19: William Davis (10001) - 2 days ago - 3 Pepperoni, Coca-Cola - Delivered
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivered_at, delivery_person_id, discount_code, applied_discount) VALUES
+(9, '10001', 27.30, 'delivered', DATE('now', '-2 days', '+12 hours'), DATE('now', '-2 days', '+13 hours'), 1, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(19, 2, 3, 8.70, 'Pepperoni Classic');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(19, 5, 1, 1.20, 'Coca-Cola 330ml');
+
+-- Order 20: Maria Lopez (10004) - 10 minutes ago - Meat Lovers, 2 Heineken, Bruschetta - Preparing
+INSERT INTO Orders (customer_id, postcode_snapshot, total_amount, status, order_time, delivery_person_id, discount_code, applied_discount) VALUES
+(10, '10004', 20.50, 'preparing', DATETIME('now', 'localtime', '-10 minutes'), 4, NULL, 0.00);
+
+INSERT INTO OrderPizza (order_id, pizza_id, quantity, unit_price, name_snapshot) VALUES
+(20, 6, 1, 12.30, 'Meat Lovers');
+
+INSERT INTO OrderProduct (order_id, product_id, quantity, unit_price, name_snapshot) VALUES
+(20, 9, 2, 2.50, 'Heineken 330ml'),
+(20, 12, 1, 3.20, 'Bruschetta (4 pieces)');
+
 

@@ -109,8 +109,9 @@ def signUp_route():
         password = request.form.get("password")
         birth_date_str = request.form.get("birth_date")
         postcode = request.form.get("postcode")
+        gender = request.form.get("gender")
 
-        if not all([first_name, last_name, email, password, birth_date_str, postcode]):
+        if not all([first_name, last_name, email, password, birth_date_str, postcode, gender]):
             return "All fields are required", 400
 
         try:
@@ -133,7 +134,8 @@ def signUp_route():
             email=email,
             password=password,
             birth_date=birth_date,
-            postcode=postcode
+            postcode=postcode,
+            gender=gender
         )
 
         db.session.add(new_customer)
@@ -416,11 +418,11 @@ def checkout_page():
     # Find delivery person for customer's postcode
     delivery_person = DeliveryPerson.query.filter_by(postcode=customer.postcode).first()
     
-    estimated_delivery_minutes = 0  # Base delivery time
+    estimated_delivery_minutes = 30  # Base delivery time
     if delivery_person and delivery_person.last_delivery_at:
         # Calculate cooldown remaining
         time_since_last = (datetime.now() - delivery_person.last_delivery_at).total_seconds() / 60
-        cooldown_remaining = max(0, 30 - time_since_last)
+        cooldown_remaining = max(0, 30 + time_since_last)
         estimated_delivery_minutes += cooldown_remaining
     
     estimated_delivery_time = datetime.now() + timedelta(minutes=estimated_delivery_minutes)
@@ -670,6 +672,102 @@ def place_order_route():
         db.session.rollback()
         flash(f"Failed to place the order. Error: {str(e)}", "danger")
         return redirect(url_for("cart_summary_route"))
+
+# -----------------------------
+# REPORTS PAGE (For Employees)
+# -----------------------------
+@app.route("/reports")
+def reports_page():
+    customer_id = session.get("customer_id")
+    customer = Customer.query.get(customer_id) if customer_id else None
+    
+    # Get filter parameters
+    report_type = request.args.get("type", "undelivered")
+    gender_filter = request.args.get("gender", "all")
+    age_filter = request.args.get("age", "all")
+    postcode_filter = request.args.get("postcode", "all")
+    
+    # 1. UNDELIVERED ORDERS
+    undelivered_orders = []
+    if report_type == "undelivered":
+        result = db.session.execute(text("""
+            SELECT * FROM UndeliveredOrders
+            ORDER BY order_time DESC
+        """))
+        undelivered_orders = [dict(row._mapping) for row in result]
+    
+    # 2. TOP 3 PIZZAS SOLD IN PAST MONTH
+    top_pizzas = []
+    if report_type == "top_pizzas":
+        result = db.session.execute(text("""
+            SELECT * FROM TopPizzasLastMonth
+            LIMIT 3
+        """))
+        top_pizzas = [dict(row._mapping) for row in result]
+    
+    # 3. EARNINGS REPORT (with filters)
+    earnings = []
+    if report_type == "earnings":
+        # Build dynamic query based on filters
+        query = """
+            SELECT 
+                c.customer_id,
+                c.first_name || ' ' || c.last_name as customer_name,
+                c.gender,
+                (CAST(strftime('%Y', DATE('now')) AS INTEGER) - CAST(strftime('%Y', c.birth_date) AS INTEGER)) as age,
+                c.postcode,
+                COUNT(o.order_id) as total_orders,
+                ROUND(SUM(o.total_amount), 2) as total_spent
+            FROM Customer c
+            LEFT JOIN Orders o ON c.customer_id = o.customer_id
+                AND o.order_time >= DATE('now', '-1 month')
+                AND o.status != 'cancelled'
+            WHERE 1=1
+        """
+        
+        params = {}
+        if gender_filter != "all":
+            query += " AND c.gender = :gender"
+            params["gender"] = gender_filter
+        
+        if age_filter != "all":
+            if age_filter == "under_25":
+                query += " AND (CAST(strftime('%Y', DATE('now')) AS INTEGER) - CAST(strftime('%Y', c.birth_date) AS INTEGER)) < 25"
+            elif age_filter == "25_40":
+                query += " AND (CAST(strftime('%Y', DATE('now')) AS INTEGER) - CAST(strftime('%Y', c.birth_date) AS INTEGER)) BETWEEN 25 AND 40"
+            elif age_filter == "over_40":
+                query += " AND (CAST(strftime('%Y', DATE('now')) AS INTEGER) - CAST(strftime('%Y', c.birth_date) AS INTEGER)) > 40"
+        
+        if postcode_filter != "all":
+            query += " AND c.postcode = :postcode"
+            params["postcode"] = postcode_filter
+        
+        query += """
+            GROUP BY c.customer_id, c.first_name, c.last_name, c.gender, c.birth_date, c.postcode
+            HAVING total_orders > 0
+            ORDER BY total_spent DESC
+        """
+        
+        result = db.session.execute(text(query), params)
+        earnings = [dict(row._mapping) for row in result]
+    
+    # Get unique postcodes for filter dropdown
+    postcodes = db.session.execute(text("SELECT DISTINCT postcode FROM Customer ORDER BY postcode")).fetchall()
+    postcode_list = [row[0] for row in postcodes]
+    
+    return render_template(
+        "reports.html",
+        customer=customer,
+        report_type=report_type,
+        undelivered_orders=undelivered_orders,
+        top_pizzas=top_pizzas,
+        earnings=earnings,
+        gender_filter=gender_filter,
+        age_filter=age_filter,
+        postcode_filter=postcode_filter,
+        postcode_list=postcode_list,
+        current_year=datetime.now().year
+    )
 
 # -----------------------------
 # RUN APP

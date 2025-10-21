@@ -24,6 +24,14 @@
         <label for="postcode">Postcode</label>
         <input type="text" name="postcode" id="postcode" pattern="\d{5}" placeholder="12345" required>
 
+        <label for="gender">Gender</label>
+        <select name="gender" id="gender" required>
+            <option value="">Select Gender</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+            <option value="Other">Other</option>
+        </select>
+
         <button type="submit" class="btn">Sign Up</button>
         <p>Already have an account? <a href="{{ url_for('signIn_route') }}">Sign In</a></p>
     </form>

@@ -31,6 +31,7 @@
                 <ul>
                     <li><a href="{{ url_for('index') }}">Home</a></li>
                     <li><a href="{{ url_for('cart_summary_route') }}">Cart</a></li>
+                    <li><a href="{{ url_for('reports_page') }}">Reports (Employees)</a></li>
                     {% if session.get('customer_id') %}
                         <li>
                             Welcome, {{ session.get('customer_name') }}!<a href="{{ url_for('logout') }}">(Logout)</a>
