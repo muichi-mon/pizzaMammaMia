@@ -165,7 +165,6 @@ def login_failed_route():
 # -----------------------------
 # ADD TO CART
 # -----------------------------
-
 @app.route("/add_to_cart/<int:pizza_id>", methods=["POST"])
 def add_to_cart(pizza_id):
     if "customer_id" not in session:
@@ -240,7 +239,6 @@ def cart_summary_route():
 # -----------------------------
 # ADD PRODUCTS PAGE
 # -----------------------------
-
 @app.route("/add_product_to_cart/<int:product_id>", methods=["POST"])
 def add_product_to_cart(product_id):
     if "customer_id" not in session:
@@ -489,8 +487,6 @@ def remove_discount():
     flash("Discount code removed.", "info")
     return redirect(url_for("checkout_page"))
 
-
-
 # -----------------------------
 # PLACE ORDER PAGE
 # -----------------------------
@@ -515,7 +511,7 @@ def place_order_route():
         today = date.today()
         is_birthday = (customer.birth_date.month == today.month and customer.birth_date.day == today.day)
 
-        # 1️⃣ Create Order (commit later)
+        # Create Order (commit later)
         new_order = Order(
             customer_id=customer_id,
             postcode_snapshot=customer.postcode,
@@ -531,7 +527,7 @@ def place_order_route():
         pizza_prices = []
         drink_prices = []
 
-        # 2️⃣ Add pizzas to OrderPizza
+        # Add pizzas to OrderPizza
         for item in cart:
             if 'pizza_id' in item:
                 pizza = Pizza.query.get(item['pizza_id'])
@@ -554,7 +550,7 @@ def place_order_route():
                 pizza_prices.append(pizza_price)
                 db.session.add(order_pizza)
 
-        # 3️⃣ Add products to OrderProduct
+        # Add products to OrderProduct
         for item in cart:
             if 'product_id' in item:
                 product = Product.query.get(item['product_id'])
@@ -579,7 +575,7 @@ def place_order_route():
 
                 db.session.add(order_product)
 
-        # 4️⃣ Calculate and apply all discounts
+        # Calculate and apply all discounts
         total_discount = 0.0
         discount_messages = []
         
@@ -635,7 +631,7 @@ def place_order_route():
         new_order.total_amount = round(final_amount, 2)
         new_order.applied_discount = round(total_discount, 2)
         
-        # 5️⃣ Assign delivery person based on postcode
+        # Assign delivery person based on postcode
         delivery_person = DeliveryPerson.query.filter_by(postcode=customer.postcode).first()
         
         if delivery_person:
@@ -657,7 +653,7 @@ def place_order_route():
         
         db.session.commit()
 
-        # 6️⃣ Clear cart and discount code from session
+        # Clear cart and discount code from session
         session.pop("cart", None)
         session.pop("discount_code", None)
         session.modified = True
