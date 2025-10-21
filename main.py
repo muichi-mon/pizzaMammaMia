@@ -2,12 +2,15 @@ import os
 from flask import *
 from datetime import datetime, date
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from ORM.Customer import Customer
 from ORM.Pizza import Pizza
 from ORM.Product import Product
 from ORM.OrderProduct import OrderProduct
 from ORM.OrderPizza import OrderPizza
 from ORM.Order import Order
+from ORM.DiscountCode import DiscountCode
+from ORM.UsedDiscountCode import UsedDiscountCode
 from ORM import db
 
 app = Flask(__name__, instance_relative_config=True)
@@ -159,9 +162,7 @@ def login_failed_route():
 # -----------------------------
 # ADD TO CART
 # -----------------------------
-# -----------------------------
-# ADD TO CART
-# -----------------------------
+
 @app.route("/add_to_cart/<int:pizza_id>", methods=["POST"])
 def add_to_cart(pizza_id):
     if "customer_id" not in session:
@@ -182,7 +183,7 @@ def add_to_cart(pizza_id):
     if not pizza_data:
         return "Pizza not found", 404
     
-    pizza_price = float(pizza_data[0])
+    pizza_price = round(float(pizza_data[0]), 2)
     pizza_name = pizza_data[1]
 
     # Initialize session cart if not present
@@ -191,7 +192,7 @@ def add_to_cart(pizza_id):
 
     cart = session["cart"]
     for item in cart:
-        if item["pizza_id"] == pizza_id:
+        if item.get("pizza_id") == pizza_id:
             item["quantity"] += 1
             break
     else:
@@ -224,7 +225,7 @@ def clear_cart():
 @app.route("/cart")
 def cart_summary_route():
     cart = session.get("cart", [])
-    total_price = sum(item["quantity"] * item["price"] for item in cart)
+    total_price = round(sum(item["quantity"] * item["price"] for item in cart), 2)
 
     return render_template(
         "cart_summary.html",
@@ -296,25 +297,179 @@ def products_page():
 @app.route("/checkout")
 def checkout_page():
     cart = session.get("cart", [])
-    total_price = sum(item["quantity"] * item["price"] for item in cart)
-
-    # Always define discount
-    discount = 0.0
-
+    if not cart:
+        flash("Your cart is empty.", "warning")
+        return redirect(url_for("index"))
+    
     customer_id = session.get("customer_id")
-    if customer_id:
-        customer = Customer.query.get(customer_id)
-        today = date.today()
-        if customer.birth_date.month == today.month and customer.birth_date.day == today.day:
-            discount = 0.10 * total_price
+    if not customer_id:
+        flash("Please sign in to checkout.", "warning")
+        return redirect(url_for("signIn_route"))
+    
+    customer = Customer.query.get(customer_id)
+    today = date.today()
+    is_birthday = (customer.birth_date.month == today.month and customer.birth_date.day == today.day)
+    
+    # Calculate totals
+    subtotal = 0.0
+    pizza_items = []
+    drink_items = []
+    other_items = []
+    
+    for item in cart:
+        item_total = item.get("quantity", 1) * item.get("price", 0)
+        subtotal += item_total
 
+        # Check if it's a pizza
+        if 'pizza_id' in item and item.get('pizza_id') is not None:
+            pizza_items.append(item)
+        # Check if it's a product (drink or snack)
+        elif 'product_id' in item and item.get('product_id') is not None:
+            product = Product.query.get(item['product_id'])
+            if product and product.category == 'drink':
+                drink_items.append(item)
+            else:
+                other_items.append(item)
+    
+    # Calculate discounts
+    discounts = []
+    total_discount = 0.0
+    
+    # 1. BIRTHDAY DISCOUNT: Free cheapest pizza + free cheapest drink
+    if is_birthday and (pizza_items or drink_items):
+        if pizza_items:
+            cheapest_pizza = min(pizza_items, key=lambda x: x['price'])
+            pizza_discount = round(cheapest_pizza['price'], 2)
+            total_discount += pizza_discount
+            discounts.append({
+                'type': 'birthday_pizza',
+                'description': '🎂 Birthday Gift: Free Pizza',
+                'amount': pizza_discount
+            })
+
+        if drink_items:
+            cheapest_drink = min(drink_items, key=lambda x: x['price'])
+            drink_discount = round(cheapest_drink['price'], 2)
+            total_discount += drink_discount
+            discounts.append({
+                'type': 'birthday_drink',
+                'description': '🎂 Birthday Gift: Free Drink',
+                'amount': drink_discount
+            })
+    
+    # 2. LOYALTY DISCOUNT: 10% off after every 10 pizzas
+    loyalty_query = db.session.execute(
+        text("SELECT total_pizzas_bought, eligible_for_loyalty_discount FROM CustomerLoyalty WHERE customer_id = :cid"),
+        {"cid": customer_id}
+    ).fetchone()
+    
+    if loyalty_query and loyalty_query[1]:  # eligible_for_loyalty_discount
+        total_pizzas = loyalty_query[0]
+        # Calculate how many times customer has earned 10% discount
+        times_earned = total_pizzas // 10
+        if times_earned > 0:
+            loyalty_discount = subtotal * 0.10
+            total_discount += loyalty_discount
+            discounts.append({
+                'type': 'loyalty',
+                'description': f'� Loyalty Reward ({total_pizzas} pizzas bought): 10% off',
+                'amount': loyalty_discount
+            })
+    
+    # 3. DISCOUNT CODE (only if not already applied and valid)
+    discount_code = session.get("discount_code")
+    if discount_code:
+        code_obj = DiscountCode.query.get(discount_code)
+        if code_obj:
+            # Check if it's single-use and already used
+            if code_obj.single_use:
+                already_used = UsedDiscountCode.query.filter_by(
+                    customer_id=customer_id,
+                    code=discount_code
+                ).first()
+                if already_used:
+                    flash(f"Discount code '{discount_code}' has already been used.", "warning")
+                    session.pop("discount_code", None)
+                    discount_code = None
+                    code_obj = None
+            
+            if code_obj:
+                if code_obj.percent_off:
+                    code_discount = (float(code_obj.percent_off) / 100.0) * subtotal
+                elif code_obj.amount_off:
+                    code_discount = min(float(code_obj.amount_off), subtotal)
+                else:
+                    code_discount = 0.0
+                
+                if code_discount > 0:
+                    total_discount += code_discount
+                    discounts.append({
+                        'type': 'code',
+                        'description': f'💳 {code_obj.description}',
+                        'amount': code_discount
+                    })
+    
+    final_total = max(0, subtotal - total_discount)
+    
     return render_template(
         "checkout.html",
         cart_items=cart,
-        total_price=round(total_price - discount, 2),
-        discount=round(discount, 2),
+        subtotal=round(subtotal, 2),
+        discounts=discounts,
+        total_discount=round(total_discount, 2),
+        total_price=round(final_total, 2),
+        discount_code=discount_code,
+        is_birthday=is_birthday,
         current_year=datetime.now().year
     )
+
+# -----------------------------
+# APPLY DISCOUNT CODE
+# -----------------------------
+@app.route("/apply_discount", methods=["POST"])
+def apply_discount():
+    code_input = request.form.get("discount_code", "").strip().upper()
+    
+    if not code_input:
+        flash("Please enter a discount code.", "warning")
+        return redirect(url_for("checkout_page"))
+    
+    customer_id = session.get("customer_id")
+    if not customer_id:
+        flash("Please sign in first.", "warning")
+        return redirect(url_for("signIn_route"))
+    
+    # Check if code exists
+    discount_code = DiscountCode.query.get(code_input)
+    if not discount_code:
+        flash("Invalid discount code.", "error")
+        return redirect(url_for("checkout_page"))
+    
+    # Check if it's a single-use code and has been used
+    if discount_code.single_use:
+        already_used = UsedDiscountCode.query.filter_by(
+            customer_id=customer_id,
+            code=code_input
+        ).first()
+        if already_used:
+            flash(f"You have already used this discount code.", "error")
+            return redirect(url_for("checkout_page"))
+    
+    # Apply the discount code
+    session["discount_code"] = code_input
+    session.modified = True
+    flash(f"Discount code '{code_input}' applied successfully!", "success")
+    return redirect(url_for("checkout_page"))
+
+# -----------------------------
+# REMOVE DISCOUNT CODE
+# -----------------------------
+@app.route("/remove_discount", methods=["POST"])
+def remove_discount():
+    session.pop("discount_code", None)
+    session.modified = True
+    flash("Discount code removed.", "info")
+    return redirect(url_for("checkout_page"))
 
 
 
@@ -337,7 +492,10 @@ def place_order_route():
     customer_name = f"{customer.first_name} {customer.last_name}"
 
     try:
-        total_amount = 0.0
+        subtotal = 0.0
+        discount_code = session.get("discount_code")
+        today = date.today()
+        is_birthday = (customer.birth_date.month == today.month and customer.birth_date.day == today.day)
 
         # 1️⃣ Create Order (commit later)
         new_order = Order(
@@ -345,24 +503,25 @@ def place_order_route():
             postcode_snapshot=customer.postcode,
             total_amount=0.0,  # placeholder, calculate after items added
             status='pending',
-            order_time=datetime.now()
+            order_time=datetime.now(),
+            discount_code=discount_code  # Save discount code if applied
         )
         db.session.add(new_order)
         db.session.flush()  # Get new_order.order_id without committing
 
+        # Track items for birthday discount
+        pizza_prices = []
+        drink_prices = []
+
         # 2️⃣ Add pizzas to OrderPizza
         for item in cart:
             if 'pizza_id' in item:
-                # Recalculate pizza price dynamically
                 pizza = Pizza.query.get(item['pizza_id'])
                 if not pizza or not pizza.active:
-                    continue  # skip unavailable pizzas
+                    continue
 
-                base_price = 5
-                pizza_price = base_price
-                for pi in pizza.ingredients:
-                    pizza_price += (pi.grams / 100.0) * pi.ingredient.cost
-                pizza_price = round(pizza_price, 2)
+                # Use the price from cart (already calculated via PizzaMenu view)
+                pizza_price = round(float(item['price']), 2)
 
                 quantity = max(1, int(item.get('quantity', 1)))
 
@@ -373,7 +532,8 @@ def place_order_route():
                     unit_price=pizza_price,
                     name_snapshot=pizza.name
                 )
-                total_amount += pizza_price * quantity
+                subtotal += pizza_price * quantity
+                pizza_prices.append(pizza_price)
                 db.session.add(order_pizza)
 
         # 3️⃣ Add products to OrderProduct
@@ -381,10 +541,10 @@ def place_order_route():
             if 'product_id' in item:
                 product = Product.query.get(item['product_id'])
                 if not product or not product.active:
-                    continue  # skip unavailable products
+                    continue
 
                 quantity = max(1, int(item.get('quantity', 1)))
-                unit_price = float(item.get('price', product.cost))
+                unit_price = round(float(item.get('price', product.cost)), 2)
 
                 order_product = OrderProduct(
                     order_id=new_order.order_id,
@@ -393,22 +553,80 @@ def place_order_route():
                     unit_price=unit_price,
                     name_snapshot=product.name
                 )
-                total_amount += unit_price * quantity
+                subtotal += unit_price * quantity
+
+                # Track drinks for birthday discount
+                if product.category == 'drink':
+                    drink_prices.append(unit_price)
+
                 db.session.add(order_product)
 
-        # 4️⃣ Update total_amount and commit transaction
-        today = date.today()
-        if customer.birth_date.month == today.month and customer.birth_date.day == today.day:
-            total_amount *= 0.9  # Apply 10% discount
-            flash("Happy Birthday! You got 10% off your order.", "success")
+        # 4️⃣ Calculate and apply all discounts
+        total_discount = 0.0
+        discount_messages = []
+        
+        # Birthday discount: Free cheapest pizza + free cheapest drink
+        if is_birthday:
+            if pizza_prices:
+                cheapest_pizza = min(pizza_prices)
+                total_discount += cheapest_pizza
+                discount_messages.append(f"🎂 Birthday Gift: Free Pizza (€{cheapest_pizza:.2f})")
+            
+            if drink_prices:
+                cheapest_drink = min(drink_prices)
+                total_discount += cheapest_drink
+                discount_messages.append(f"🎂 Birthday Gift: Free Drink (€{cheapest_drink:.2f})")
+        
+        # Loyalty discount: 10% off after every 10 pizzas
+        loyalty_query = db.session.execute(
+            text("SELECT total_pizzas_bought, eligible_for_loyalty_discount FROM CustomerLoyalty WHERE customer_id = :cid"),
+            {"cid": customer_id}
+        ).fetchone()
+        
+        if loyalty_query and loyalty_query[1]:  # eligible_for_loyalty_discount
+            loyalty_discount = round(subtotal * 0.10, 2)
+            total_discount += loyalty_discount
+            discount_messages.append(f"🌟 Loyalty Reward: 10% off (€{loyalty_discount:.2f})")
+        
+        # Discount code
+        if discount_code:
+            code_obj = DiscountCode.query.get(discount_code)
+            if code_obj:
+                code_discount = 0.0
+                if code_obj.percent_off:
+                    code_discount = (float(code_obj.percent_off) / 100.0) * subtotal
+                    discount_messages.append(f"💳 {code_obj.description}: {code_obj.percent_off}% off (€{code_discount:.2f})")
+                elif code_obj.amount_off:
+                    code_discount = min(float(code_obj.amount_off), subtotal)
+                    discount_messages.append(f"💳 {code_obj.description}: €{code_discount:.2f} off")
+                
+                total_discount += code_discount
+                
+                # Track single-use code usage
+                if code_obj.single_use:
+                    used_code = UsedDiscountCode(
+                        customer_id=customer_id,
+                        code=discount_code,
+                        order_id=new_order.order_id,
+                        used_at=datetime.now()
+                    )
+                    db.session.add(used_code)
 
-        new_order.total_amount = round(total_amount, 2)
+        # Apply final amount
+        final_amount = max(0, subtotal - total_discount)
+        new_order.total_amount = round(final_amount, 2)
+        new_order.applied_discount = round(total_discount, 2)
+        
         db.session.commit()
 
-        # 5️⃣ Clear cart session
+        # 5️⃣ Clear cart and discount code from session
         session.pop("cart", None)
+        session.pop("discount_code", None)
         session.modified = True
 
+        # Show discount messages
+        for msg in discount_messages:
+            flash(msg, "success")
         flash("Your order has been placed successfully!", "success")
         return render_template("order_success.html", customer_name=customer_name, current_year=datetime.now().year)
 

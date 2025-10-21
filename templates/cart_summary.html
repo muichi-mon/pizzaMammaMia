@@ -23,13 +23,13 @@
                 <tr>
                     <td>{{ item.name }}</td>
                     <td>{{ item.quantity }}</td>
-                    <td>€{{ item.price }}</td>
-                    <td>€{{ item.quantity * item.price }}</td>
+                    <td>€{{ "%.2f"|format(item.price) }}</td>
+                    <td>€{{ "%.2f"|format(item.quantity * item.price) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <p class="cart-total">Total: <strong>€{{ total_price }}</strong></p>
+        <p class="cart-total">Total: <strong>€{{ "%.2f"|format(total_price) }}</strong></p>
 
         <!-- Proceed button instead of Place Order -->
         <a href="{{ url_for('products_page') }}" class="btn">Proceed</a>

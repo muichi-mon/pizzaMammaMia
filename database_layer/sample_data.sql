@@ -178,10 +178,8 @@ INSERT INTO DeliveryPerson (full_name, phone) VALUES
 -- DISCOUNT CODES
 -- =============================================
 INSERT INTO DiscountCode (code, description, percent_off, amount_off, single_use) VALUES
-('WELCOME10', 'Welcome discount for new customers', 10.00, NULL, TRUE),
 ('SAVE5', 'Save $5 on your order', NULL, 5.00, TRUE),
 ('LOYAL15', 'Loyalty reward - 15% off', 15.00, NULL, FALSE),
-('BDAY2024', 'Birthday special discount', 20.00, NULL, TRUE),
 ('FREEPIZZA', 'Free pizza voucher', NULL, 10.00, TRUE);
 
 

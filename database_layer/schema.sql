@@ -74,6 +74,23 @@ CREATE TABLE DiscountCode (
     CONSTRAINT chk_amount_positive CHECK (amount_off IS NULL OR amount_off > 0)
 );
 
+--tracks which customers have used which one-time discount codes
+CREATE TABLE UsedDiscountCode (
+    customer_id INT NOT NULL,
+    code VARCHAR(32) NOT NULL,
+    used_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    order_id INT NOT NULL,
+    
+    PRIMARY KEY (customer_id, code),
+    
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (code) REFERENCES DiscountCode(code)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 --product table (drinks and snacks)
 CREATE TABLE Product (
     product_id INT AUTO_INCREMENT PRIMARY KEY,

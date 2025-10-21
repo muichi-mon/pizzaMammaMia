@@ -30,13 +30,22 @@ WHERE active = TRUE;
 
 
 
---loyalty discounts
+--loyalty discounts: 10% off after every 10 pizzas
 CREATE VIEW IF NOT EXISTS CustomerLoyalty AS
-SELECT c.customer_id,c.first_name,c.last_name,c.email,
+SELECT 
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    c.email,
     COALESCE(SUM(op.quantity), 0) AS total_pizzas_bought,
-CASE WHEN COALESCE(SUM(op.quantity), 0) % 10 = 0 AND COALESCE(SUM(op.quantity), 0) > 0 THEN TRUE ELSE FALSE END AS eligible_for_loyalty_discount
+    FLOOR(COALESCE(SUM(op.quantity), 0) / 10) AS loyalty_discounts_earned,
+    CASE 
+        WHEN COALESCE(SUM(op.quantity), 0) >= 10 THEN TRUE 
+        ELSE FALSE 
+    END AS eligible_for_loyalty_discount,
+    COALESCE(SUM(op.quantity), 0) % 10 AS pizzas_until_next_discount
 FROM Customer c
-LEFT JOIN Orders o ON c.customer_id = o.customer_id
+LEFT JOIN Orders o ON c.customer_id = o.customer_id AND o.cancelled_at IS NULL
 LEFT JOIN OrderPizza op ON o.order_id = op.order_id
 GROUP BY c.customer_id, c.first_name, c.last_name, c.email;
 

@@ -23,21 +23,45 @@
                 <tr>
                     <td>{{ item.name }}</td>
                     <td>{{ item.quantity }}</td>
-                    <td>€{{ item.price }}</td>
-                    <td>€{{ item.quantity * item.price }}</td>
+                    <td>€{{ "%.2f"|format(item.price) }}</td>
+                    <td>€{{ "%.2f"|format(item.quantity * item.price) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <p class="checkout-total">
-            {% if discount > 0 %}
-                Birthday Discount: -€{{ discount }}<br>
+        <!-- Discount Code Section -->
+        <div class="discount-section">
+            {% if not is_birthday %}
+                <form action="{{ url_for('apply_discount') }}" method="POST" class="discount-form">
+                    <input type="text" name="discount_code" placeholder="Enter discount code" 
+                           value="{{ discount_code if discount_code else '' }}" 
+                           {% if discount_code %}disabled{% endif %}>
+                    {% if discount_code %}
+                        <button type="button" onclick="document.getElementById('remove-discount-form').submit();" class="btn-remove">Remove</button>
+                    {% else %}
+                        <button type="submit" class="btn-apply">Apply</button>
+                    {% endif %}
+                </form>
+                <form id="remove-discount-form" action="{{ url_for('remove_discount') }}" method="POST" style="display:none;"></form>
             {% endif %}
-            Total: <strong>€{{ total_price }}</strong>
-        </p>
+        </div>
 
-        <!-- Only option: place order -->
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <p>Subtotal: €{{ subtotal }}</p>
+            
+            {% if discounts %}
+                {% for discount in discounts %}
+                    <p class="discount-line">{{ discount.description }}: -€{{ "%.2f"|format(discount.amount) }}</p>
+                {% endfor %}
+                <p class="total-discount">Total Discounts: -€{{ total_discount }}</p>
+            {% endif %}
+            
+            <p class="checkout-total">Total: <strong>€{{ total_price }}</strong></p>
+        </div>
+
+        <!-- Place Order -->
         <form action="{{ url_for('place_order_route') }}" method="POST">
             <button type="submit" class="btn">Place Order</button>
         </form>
